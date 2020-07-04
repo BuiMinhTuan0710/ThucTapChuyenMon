@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    >
+
+    <ImageView
+        android:id="@+id/imgHinhAnh"
+        android:layout_width="120dp"
+        android:layout_height="100dp"
+        android:background="@drawable/pho" />
+    <TextView
+        android:id="@+id/txtTenSP"
+        android:layout_width="201dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Gà nướng ớt cay"
+        android:textSize="16dp"
+        android:textStyle="bold"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+       >
+        <TextView
+            android:id="@+id/txtGiaBan"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="150,000đ"
+            android:textStyle="bold"
+            android:textColor="@color/colorBlue"
+            android:textSize="13dp"/>
+        <TextView
+            android:id="@+id/txtGiaThuc"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="180.0000đ"
+            android:textColor="@color/colorblack"
+            android:textSize="13dp"/>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "597106951683",
+    "firebase_url": "https://fir-e0bc3.firebaseio.com",
+    "project_id": "fir-e0bc3",
+    "storage_bucket": "fir-e0bc3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:597106951683:android:f2a19bd2a93af7a706f036",
+        "android_client_info": {
+          "package_name": "com.example.thuctapchuyenmon"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "597106951683-mb9uefnfh5o4ogikn8m9v747bh0eejvi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmBiS5_ywKPTBxm68-tidhiQcmEKdwGME"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "597106951683-mb9uefnfh5o4ogikn8m9v747bh0eejvi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
