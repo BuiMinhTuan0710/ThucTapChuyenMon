@@ -3,4 +3,5 @@
     <string name="title_activity_maps">Map</string>
     <string name="facebook_app_id">585543569061394</string>
     <string name="fb_login_protocol_scheme">fb585543569061394</string>
+    <string name="register"><u>I dont have account?</u></string>
 </resources>

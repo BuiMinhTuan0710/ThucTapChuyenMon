@@ -61,7 +61,6 @@ public class OtpActivity extends AppCompatActivity {
         @Override
         public void onVerificationCompleted(@NonNull PhoneAuthCredential phoneAuthCredential) {
             code = phoneAuthCredential.getSmsCode();
-            Toast.makeText(OtpActivity.this, code, Toast.LENGTH_LONG).show();
         }
 
         @Override

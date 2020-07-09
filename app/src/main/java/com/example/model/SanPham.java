@@ -3,17 +3,27 @@ package com.example.model;
 import java.io.Serializable;
 
 public class SanPham implements Serializable {
+    String masp;
     String tensp;
-    int hinhsp;
+    String hinhsp;
     int giasp;
 
-    public SanPham(String tensp, int hinhsp, int giasp) {
+    public SanPham(String masp,String tensp, String hinhsp, int giasp) {
+        this.masp = masp;
         this.tensp = tensp;
         this.hinhsp = hinhsp;
         this.giasp = giasp;
     }
 
     public SanPham() {
+    }
+
+    public String getMasp() {
+        return masp;
+    }
+
+    public void setMasp(String masp) {
+        this.masp = masp;
     }
 
     public String getTensp() {
@@ -24,11 +34,11 @@ public class SanPham implements Serializable {
         this.tensp = tensp;
     }
 
-    public int getHinhsp() {
+    public String getHinhsp() {
         return hinhsp;
     }
 
-    public void setHinhsp(int hinhsp) {
+    public void setHinhsp(String hinhsp) {
         this.hinhsp = hinhsp;
     }
 

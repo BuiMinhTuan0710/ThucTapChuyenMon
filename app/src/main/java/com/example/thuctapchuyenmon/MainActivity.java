@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         createRequest();
         addViews();
-        setupLoginFacebook();
+        //setupLoginFacebook();
     }
 
     private void setupLoginFacebook() {
@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addViews() {
-        loginButton =  findViewById(R.id.login_button);
+        //loginButton =  findViewById(R.id.login_button);
 
     }
     public void createRequest()
@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
     }
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        FBCallbackManager.onActivityResult(requestCode,resultCode,data);
+       // FBCallbackManager.onActivityResult(requestCode,resultCode,data);
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
@@ -194,6 +194,12 @@ public class MainActivity extends AppCompatActivity {
         LoaiSP loaiSP = new LoaiSP();
         loaiSP.execute();
     }
+
+    public void clickRegister(View view) {
+        Intent intent = new Intent(MainActivity.this,RegisterActivity.class);
+        startActivity(intent);
+    }
+
     class LoaiSP extends AsyncTask<Void,Void,String>
     {
         @Override

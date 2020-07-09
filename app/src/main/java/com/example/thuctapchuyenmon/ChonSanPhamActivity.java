@@ -13,12 +13,13 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.model.SanPham;
+import com.squareup.picasso.Picasso;
 
 public class ChonSanPhamActivity extends AppCompatActivity {
 
     ImageView imgChonSP;
     TextView txtSL;
-    int soluong = 0;
+    int soluong;
     Intent intent;
 
     @Override
@@ -32,7 +33,10 @@ public class ChonSanPhamActivity extends AppCompatActivity {
     private void showData() {
         intent = getIntent();
         SanPham sp = (SanPham) intent.getSerializableExtra("SanPham");
-        imgChonSP.setImageResource(sp.getHinhsp());
+        soluong = intent.getIntExtra("soluong",0);
+        txtSL.setText(soluong+"");
+        String image = sp.getHinhsp()+"?type=large";
+        Picasso.get().load(image).into(imgChonSP);
     }
 
     private void addViews() {
