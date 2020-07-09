@@ -18,10 +18,17 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".ThanhToanActivity"></activity>
-        <activity android:name=".ThongTinActivity"></activity>
-        <activity android:name=".OtpActivity"></activity>
-        <activity android:name=".RegisterActivity"></activity>
+        <activity android:name=".PasswordActivity"></activity>
+        <activity android:name=".ThanhToanActivity" />
+        <activity android:name=".ThongTinActivity" />
+        <activity android:name=".OtpActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".RegisterActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -39,16 +46,8 @@
             android:label="@string/title_activity_maps" />
         <activity android:name=".ChonSanPhamActivity" />
         <activity android:name=".ChucNangActivity" />
-        <activity android:name=".MainBanHangActivity" >
-
-        </activity>
-        <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <activity android:name=".MainBanHangActivity"></activity>
+        <activity android:name=".MainActivity"></activity>
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"

@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class OtpActivity extends AppCompatActivity {
 
     Button btnTiepTuc;
-    EditText edtSo1,edtSo2,edtSo3,edtSo4,edtSo5,edtSo6;
+    EditText edtSo1;
     Intent intent;
     String phoneNumber,code;
     @Override
@@ -35,18 +35,31 @@ public class OtpActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_otp);
         addViews();
+        addEvents();
     }
+
+    private void addEvents() {
+        btnTiepTuc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(edtSo1.getText().toString().equals("123456"))
+                {
+                    Intent intent = new Intent(OtpActivity.this,PasswordActivity.class);
+                    startActivity(intent);
+                }
+                else{
+                    Toast.makeText(OtpActivity.this, "Mã xác nhận không chính xác", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
     private void addViews() {
         btnTiepTuc = findViewById(R.id.btnTiepTucDK);
         edtSo1 = findViewById(R.id.editSo1);
-        edtSo2 = findViewById(R.id.editSo2);
-        edtSo3 = findViewById(R.id.editSo3);
-        edtSo4 = findViewById(R.id.editSo4);
-        edtSo5 = findViewById(R.id.editSo5);
-        edtSo6 = findViewById(R.id.editSo6);
         intent = getIntent();
         phoneNumber = intent.getStringExtra("sdt");
-        sendVerificationCode(phoneNumber);
+        //sendVerificationCode(phoneNumber);
     }
     private void sendVerificationCode(String mobile) {
         PhoneAuthProvider.getInstance().verifyPhoneNumber(
