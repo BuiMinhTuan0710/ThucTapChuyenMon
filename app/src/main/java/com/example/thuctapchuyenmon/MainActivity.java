@@ -8,8 +8,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.database.connect;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
@@ -60,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     private CallbackManager FBCallbackManager;
     private LoginButton loginButton;
     private String tag = "Facebook Login :";
+    private EditText edtUser,edtPassword;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -135,7 +138,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addViews() {
-        //loginButton =  findViewById(R.id.login_button);
+        edtUser = findViewById(R.id.edtUser);
+        edtPassword = findViewById(R.id.edtPass);
 
     }
     public void createRequest()
@@ -191,8 +195,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void clickSignIn(View view) {
-        LoaiSP loaiSP = new LoaiSP();
-        loaiSP.execute();
+        KiemTraDangNhap kiemTraDangNhap = new KiemTraDangNhap();
+        kiemTraDangNhap.execute();
     }
 
     public void clickRegister(View view) {
@@ -200,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    class LoaiSP extends AsyncTask<Void,Void,String>
+    class KiemTraDangNhap extends AsyncTask<Void,Void,Boolean>
     {
         @Override
         protected void onPreExecute() {
@@ -208,9 +212,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(String s) {
-            Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
-            super.onPostExecute(s);
+        protected void onPostExecute(Boolean b) {
+            if(b)
+            {
+                Intent intent = new Intent(MainActivity.this,ChucNangActivity.class);
+                startActivity(intent);
+            }
+            else 
+            {
+                Toast.makeText(MainActivity.this, "Tài khoản hoặc mật khẩu không chính xác", Toast.LENGTH_SHORT).show();
+            }
+            super.onPostExecute(b);
         }
 
         @Override
@@ -219,25 +231,24 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected String doInBackground(Void... voids) {
+        protected void onCancelled(Boolean b) {
+            super.onCancelled(b);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
             try {
-                URL url = new URL("http://www.minhtuan.somee.com/myService.asmx/ds_loaisp");
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("POST");
-                connection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-
-                DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
-                Document document = documentBuilder.parse(connection.getInputStream());
-                NodeList nodeList = document.getElementsByTagName("LoaiSanPham");
-                Element element = (Element) nodeList.item(0);
-
-                String kq = element.getElementsByTagName("TenLoai").item(0).getTextContent();
-                return kq;
-            } catch (Exception e) {
-                Log.e( "loi: ", e.toString());
+                connect connect = new connect("kiemtraDangNhap");
+                String param = "tk="+edtUser.getText()+"&mk="+edtPassword.getText();
+                NodeList nodeList = connect.getDataParameter(param,"boolean");
+                String kiemtra = nodeList.item(0).getTextContent();
+                boolean kt = Boolean.parseBoolean(kiemtra);
+                return kt;
             }
-            return "";
+            catch (Exception e)
+            {
+                return false;
+            }
         }
     }
 }

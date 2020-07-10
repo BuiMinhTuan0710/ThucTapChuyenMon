@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.adapter.SanPhamAdapter;
 import com.example.adapter.ThongTinSanPhamAdapter;
+import com.example.database.connect;
 import com.example.model.LoaiSanPham;
 import com.example.model.SanPham;
 
@@ -197,15 +198,8 @@ public class MainBanHangActivity extends AppCompatActivity {
         protected List<LoaiSanPham> doInBackground(Void... voids) {
             List<LoaiSanPham>ds_loai = new ArrayList<>();
             try {
-                URL url = new URL("http://www.minhtuan.somee.com/myService.asmx/ds_loaisp");
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("POST");
-                connection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-
-                DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
-                Document document = documentBuilder.parse(connection.getInputStream());
-                NodeList nodeList = document.getElementsByTagName("LoaiSanPham");
+                connect connect = new connect("ds_loaisp");
+                NodeList nodeList = connect.getData("LoaiSanPham");
                 for (int i=0;i<nodeList.getLength();i++)
                 {
                     Element element = (Element) nodeList.item(i);
@@ -250,20 +244,8 @@ public class MainBanHangActivity extends AppCompatActivity {
             List<SanPham>ds_sp = new ArrayList<>();
             String params = "maloai="+strings[0];
             try {
-                URL url = new URL("http://www.minhtuan.somee.com/myService.asmx/ds_SanPham");
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("POST");
-                connection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-                OutputStream os = connection.getOutputStream();
-                OutputStreamWriter ws = new OutputStreamWriter(os,"UTF-8");
-                ws.write(params);
-                ws.flush();
-                ws.close();
-
-                DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
-                Document document = documentBuilder.parse(connection.getInputStream());
-                NodeList nodeList = document.getElementsByTagName("SanPham");
+                connect connect = new connect("ds_SanPham");
+                NodeList nodeList = connect.getDataParameter(params,"SanPham");
                 for (int i=0;i<nodeList.getLength();i++)
                 {
                     Element element = (Element) nodeList.item(i);

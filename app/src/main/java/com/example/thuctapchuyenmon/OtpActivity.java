@@ -45,6 +45,7 @@ public class OtpActivity extends AppCompatActivity {
                 if(edtSo1.getText().toString().equals("123456"))
                 {
                     Intent intent = new Intent(OtpActivity.this,PasswordActivity.class);
+                    intent.putExtra("sdt",phoneNumber);
                     startActivity(intent);
                 }
                 else{
