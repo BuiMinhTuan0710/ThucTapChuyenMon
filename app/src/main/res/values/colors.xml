@@ -3,8 +3,14 @@
     <color name="colorPrimary">#6200EE</color>
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
-    <color name="colorWhite">#FFFFFF</color>
     <color name="colorblack">#040303</color>
     <color name="colorBlue">#211FA2</color>
     <color name="colorRed">#F81504</color>
+    <color name="colorBlack">#D2000000</color>
+    <color name="colorBlackTransparent">#00000000</color>
+    <color name="colorWhite">#fff</color>
+    <color name="colorOrange">#FF8C00</color>
+    <color name="colorActive">#CD3EC944</color>
+    <color name="colorStroke">#979797</color>
+    <color name="colorStrokeTransparent">#75E6E5E5</color>
 </resources>

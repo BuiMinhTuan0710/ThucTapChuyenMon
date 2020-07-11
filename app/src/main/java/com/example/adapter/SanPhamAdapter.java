@@ -1,6 +1,7 @@
 package com.example.adapter;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.StrikethroughSpan;
@@ -13,62 +14,67 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.database.connect;
 import com.example.model.SanPham;
 import com.example.thuctapchuyenmon.R;
+import com.makeramen.roundedimageview.RoundedImageView;
 import com.squareup.picasso.Picasso;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class SanPhamAdapter extends RecyclerView.Adapter<SanPhamAdapter.ViewHolder> {
-    ArrayList<SanPham> ds_SanPham;
+    List<SanPham> ds_SanPham;
+    private int resource;
     Context context;
 
-    public SanPhamAdapter(ArrayList<SanPham> ds_SanPham, Context context) {
+    public SanPhamAdapter(List<SanPham> ds_SanPham,int resource, Context context) {
         this.ds_SanPham = ds_SanPham;
+        this.resource = resource;
         this.context = context;
     }
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View customView = inflater.inflate(R.layout.custom_itemsphot,null);
-        return new ViewHolder(customView);
+        View view = LayoutInflater.from(parent.getContext()).inflate(resource, parent, false);
+        return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.txtMaSP.setText(ds_SanPham.get(position).getMasp());
-       // holder.imgHinh.setImageResource(ds_SanPham.get(position).getHinhsp());
-        String image = ds_SanPham.get(position).getHinhsp()+"?type=large";
-        Log.e("URL ",image );
+       String image = ds_SanPham.get(position).getHinhsp()+"?type=large";
         Picasso.get().load(image).into(holder.imgHinh);
         holder.txtTenSP.setText(ds_SanPham.get(position).getTensp());
-        holder.txtGia.setText(ds_SanPham.get(position).getGiasp()+"đ");
-        int giathuc = (int) (ds_SanPham.get(position).getGiasp()*1.5);
-        SpannableString spannableString = new SpannableString(giathuc+"đ");
+        int giathuc = (int) (ds_SanPham.get(position).getGiasp()*(100-ds_SanPham.get(position).getGiamgia())/100);
+        holder.txtGia.setText(giathuc+"đ");
+        int giaBan = ds_SanPham.get(position).getGiasp();
+        SpannableString spannableString = new SpannableString(giaBan+"đ");
         StrikethroughSpan strikethroughSpan = new StrikethroughSpan();
-        char[]gia = (giathuc+"đ").toCharArray();
+        char[]gia = (giaBan+"đ").toCharArray();
         spannableString.setSpan(strikethroughSpan,0,gia.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         holder.txtGiaThuc.setText(spannableString);
     }
-
-
     @Override
     public int getItemCount() {
-        return ds_SanPham.size();
+        return ds_SanPham == null ? 0 : ds_SanPham.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
 
-        ImageView imgHinh;
+        RoundedImageView imgHinh;
         TextView txtMaSP,txtTenSP,txtGia,txtGiaThuc;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            txtMaSP = itemView.findViewById(R.id.txtMaSP);
-            imgHinh = itemView.findViewById(R.id.imgHinhAnh);
-            txtTenSP = itemView.findViewById(R.id.txtTenSP);
-            txtGia = itemView.findViewById(R.id.txtGiaBan);
-            txtGiaThuc = itemView.findViewById(R.id.txtGiaThuc);
+            txtMaSP = itemView.findViewById(R.id.txtMaSPSale);
+            imgHinh = itemView.findViewById(R.id.imgFoodSale);
+            txtTenSP = itemView.findViewById(R.id.txtNameFoodSale);
+            txtGia = itemView.findViewById(R.id.txtGiaBanSale);
+            txtGiaThuc = itemView.findViewById(R.id.txtGiamGiaSale);
         }
     }
 }

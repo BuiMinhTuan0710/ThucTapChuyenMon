@@ -132,8 +132,8 @@ public class MainBanHangActivity extends AppCompatActivity {
         Drawable drawable = ContextCompat.getDrawable(getApplicationContext(),R.drawable.custom_divider);
         dividerItemDecoration.setDrawable(drawable);
         ArrayList<SanPham> ds_SanPham = new ArrayList<>();
-        SanPhamAdapter sanPhamAdapter = new SanPhamAdapter(ds_SanPham,getApplicationContext());
-        rvSanPhamHot.setAdapter(sanPhamAdapter);
+       // SanPhamAdapter sanPhamAdapter = new SanPhamAdapter(ds_SanPham,getApplicationContext());
+       // rvSanPhamHot.setAdapter(sanPhamAdapter);
         addTab();
     }
 
@@ -143,7 +143,7 @@ public class MainBanHangActivity extends AppCompatActivity {
         ds_sanpham = new ArrayList<SanPham>();
         ThongTinSanPham thongTinSanPham = new ThongTinSanPham();
         thongTinSanPham.execute("L01");
-        adapter = new ThongTinSanPhamAdapter(ds_sanpham,MainBanHangActivity.this,R.layout.custom_item);
+        //adapter = new ThongTinSanPhamAdapter(ds_sanpham,MainBanHangActivity.this,R.layout.custom_item);
         tabDanhMuc.setup();
         LoaiSP loaiSP = new LoaiSP();
         loaiSP.execute();
@@ -231,7 +231,6 @@ public class MainBanHangActivity extends AppCompatActivity {
                     sanPhams) {
                 ds_sanpham.add(sp);
             }
-            lvDanhSach.setAdapter(adapter);
             adapter.notifyDataSetChanged();
         }
         @Override

@@ -7,12 +7,28 @@ public class SanPham implements Serializable {
     String tensp;
     String hinhsp;
     int giasp;
+    int giamgia;
 
     public SanPham(String masp,String tensp, String hinhsp, int giasp) {
         this.masp = masp;
         this.tensp = tensp;
         this.hinhsp = hinhsp;
         this.giasp = giasp;
+    }
+    public SanPham(String masp,String tensp, String hinhsp, int giasp,int giamgia) {
+        this.masp = masp;
+        this.tensp = tensp;
+        this.hinhsp = hinhsp;
+        this.giasp = giasp;
+        this.giamgia = giamgia;
+    }
+
+    public int getGiamgia() {
+        return giamgia;
+    }
+
+    public void setGiamgia(int giamgia) {
+        this.giamgia = giamgia;
     }
 
     public SanPham() {
