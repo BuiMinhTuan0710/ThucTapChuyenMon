@@ -13,6 +13,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.example.adapter.ViewPagerNavigationAdapter;
 import com.example.model.ExploreFragment;
+import com.example.model.MyOrderFlagment;
 import com.example.model.ProfileFragment;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -64,11 +65,16 @@ public class ChucNangActivity extends AppCompatActivity {
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerNavigationAdapter adapter = new ViewPagerNavigationAdapter(getSupportFragmentManager());
         ExploreFragment exploreFragment = new ExploreFragment();
+        Intent intent = getIntent();
+        exploreFragment.MaKhachHang = intent.getStringExtra("makh");
         ProfileFragment profileFragment = new ProfileFragment();
+        profileFragment.makh = intent.getStringExtra("makh");
+        MyOrderFlagment myOrderFlagment = new MyOrderFlagment();
+        myOrderFlagment.MaKhachHang = intent.getStringExtra("makh");
         adapter.addFragment(exploreFragment);
+        adapter.addFragment(myOrderFlagment);
         adapter.addFragment(profileFragment);
         viewPager.setAdapter(adapter);
-
     }
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
         @Override
@@ -82,11 +88,11 @@ public class ChucNangActivity extends AppCompatActivity {
 
                     return true;
                 case R.id.navigation_favourite:
-                    viewPager.setCurrentItem(1);
+                    viewPager.setCurrentItem(2);
 
                     return true;
                 case R.id.navigation_profile:
-                    viewPager.setCurrentItem(1);
+                    viewPager.setCurrentItem(2);
                     return true;
             }
             return false;

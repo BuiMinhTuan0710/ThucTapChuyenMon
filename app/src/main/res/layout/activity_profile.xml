@@ -124,7 +124,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="6"
                 android:fontFamily="@font/oswald"
-                android:text="favourite"
+                android:text="my profile"
                 android:textColor="@color/colorBlack"
                 android:textSize="@dimen/text_size_20" />
 
@@ -201,6 +201,7 @@
                 android:textSize="@dimen/text_size_20" />
 
             <ImageView
+                android:id="@+id/imgSetting"
                 android:layout_width="0dp"
                 android:layout_height="30dp"
                 android:layout_gravity="center"

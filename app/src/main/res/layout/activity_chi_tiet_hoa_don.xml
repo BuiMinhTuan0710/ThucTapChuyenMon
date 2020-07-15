@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+
+    <TextView
+        android:textColor="@color/colorOrange"
+        android:textSize="@dimen/text_size_50"
+        android:fontFamily="@font/oswald"
+        android:layout_margin="@dimen/margin20"
+        android:text="Hóa Đơn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerMyorderCT"
+        android:layout_margin="@dimen/margin10"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+    <com.jpardogo.android.googleprogressbar.library.GoogleProgressBar
+        android:id="@+id/progressOrderCT"
+        android:visibility="gone"
+        android:background="@drawable/round_icon_cart"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        type="nexus_rotation_cross"/>
+</LinearLayout>

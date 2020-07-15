@@ -1,5 +1,7 @@
 package com.example.thuctapchuyenmon;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -9,16 +11,33 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.example.database.connect;
 import com.example.model.DataParser;
+import com.example.model.DialogLoading;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
@@ -28,12 +47,16 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.NodeList;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -45,21 +68,141 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import es.dmoral.toasty.Toasty;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private GoogleMap mMap;
-    GoogleApiClient mGoogleApiClient;
-    Location mLastLocation;
-    Marker mCurrLocationMarker;
-    LatLng hientai,supham = new LatLng(10.850884, 106.771739);
-    LocationRequest mLocationRequest;
-    LocationManager locationManager;
-
+    EditText edtAddress,edtSearchPlace,edtNguoiNhan,edtSdtNhan;
+    Button btnMyOrder;
+    String mahd;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        addViews();
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                mMap = googleMap;
+                if (ActivityCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return;
+                }
+                mMap.setMyLocationEnabled(true);
+                ViTriHienTai();
+                addEvents();
+            }
+        });
+    }
+    private void addViews() {
+        edtAddress = findViewById(R.id.edtAddress);
+        edtSearchPlace = findViewById(R.id.edtSearchPlace);
+        edtNguoiNhan = findViewById(R.id.edtNguoiNhan);
+        edtSdtNhan = findViewById(R.id.edtsdtNhan);
+        btnMyOrder = findViewById(R.id.btnMyOrder);
+        Intent intent = getIntent();
+        mahd = intent.getStringExtra("mahd");
+        Log.e("mahoadon", mahd );
+    }
+
+    private void addEvents() {
+
+        edtSearchPlace.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    TimKiemDiaChi(edtSearchPlace.getText().toString());
+                }
+                return true;
+            }
+        });
+        edtSearchPlace.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(s.length()==0)
+                {
+                    mMap.clear();
+                    ViTriHienTai();
+                }
+            }
+        });
+
+        btnMyOrder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e("btn", "onClick: " );
+                UpdateHoaDon update = new UpdateHoaDon();
+                update.execute(mahd);
+            }
+        });
+    }
+
+    public class UpdateHoaDon extends AsyncTask<String,Void,Boolean>
+    {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            if(aBoolean)
+            {
+                Toasty.success(MapsActivity.this,"Order thành công!").show();
+                finish();
+            }
+            super.onPostExecute(aBoolean);
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onCancelled(Boolean aBoolean) {
+            super.onCancelled(aBoolean);
+        }
+
+        @Override
+        protected Boolean doInBackground(String... strings) {
+            String params = "mahd="+mahd+"&sdt="+edtSdtNhan.getText()+"&nguoinhan="+edtNguoiNhan.getText()+"&diachi="+edtAddress.getText();
+            try {
+                connect connect = new connect("updateHoaDon");
+                NodeList nodeList = connect.getDataParameter(params, "boolean");
+                String kiemtra = nodeList.item(0).getTextContent();
+                boolean b = Boolean.parseBoolean(kiemtra);
+                return b;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+
+        }
+    }
+    private void ViTriHienTai() {
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        Criteria criteria = new Criteria();
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -70,189 +213,98 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, this);
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            checkLocationPermission();
+        Location lastLocation = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
+        if (lastLocation != null)
+        {
+            LatLng latLng = new LatLng(lastLocation.getLatitude(),lastLocation.getLongitude());
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 15));
+            Marker marker = mMap.addMarker(new MarkerOptions().position(latLng));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,16));
+            String diachi = lastLocation.getLatitude()+","+lastLocation.getLongitude();
+            ThongTinViTri(diachi);
         }
     }
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        Marker marker= mMap.addMarker(
-                new MarkerOptions()
-                        .position(supham)
-                        .title("Truong dai hoc su pham ki thuat"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(supham,16));
-        marker.showInfoWindow();
-    }
-    private String getUrl(LatLng origin, LatLng dest) {
-        String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
-        String str_dest = "destination=" + dest.latitude + "," + dest.longitude;
-        String sensor = "sensor=false";
-        String parameters = str_origin + "&" + str_dest + "&" + sensor;
-        String output = "json";
-        String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters+"&key=AIzaSyBbzK7wekE_YyZy95z_XVpDlsmhkgtFN8U";
-        Log.e( "getUrl: ",url);
-        return url;
-    }
-    private String downloadUrl(String strUrl) throws IOException {
-        String data = "";
-        InputStream iStream = null;
-        HttpURLConnection urlConnection = null;
-        try {
-            URL url = new URL(strUrl);
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.connect();
-            iStream = urlConnection.getInputStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
-            StringBuffer sb = new StringBuffer();
-            String line = "";
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
-            data = sb.toString();
-            Toast.makeText(this, "download URL", Toast.LENGTH_SHORT).show();
-            br.close();
 
-        } catch (Exception e) {
-            Log.d("Exception", e.toString());
-        } finally {
-            iStream.close();
-            urlConnection.disconnect();
-        }
-        return data;
-    }
-    private class FetchUrl extends AsyncTask<String, Void, String> {
-        @Override
-        protected String doInBackground(String... url) {
-            String data = "";
-            try {
-                data = downloadUrl(url[0]);
-                Log.d("Background Task data", data.toString());
-            } catch (Exception e) {
-                Log.d("Background Task", e.toString());
-            }
-            return data;
-        }
+    public void TimKiemDiaChi(String diachi)
+    {
+        mMap.clear();
+        String point = "https://maps.googleapis.com/maps/api/place/textsearch/json?query="+diachi+"&key=AIzaSyDNI_ZWPqvdS6r6gPVO50I4TlYkfkZdXh8";
+        final RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, point, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    String results =jsonObject.getString("results");
+                    JSONArray array = new JSONArray(results);
 
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-            ParserTask parserTask = new ParserTask();
-            parserTask.execute(result);
+                    for (int i=0;i<array.length();i++)
+                    {
+                        JSONObject object = array.getJSONObject(i);
+                        Log.e("response",object.getString("formatted_address"));
 
-        }
-    }
-    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
-        @Override
-        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
-            JSONObject jObject;
-            List<List<HashMap<String, String>>> routes = null;
+                        edtAddress.setText(object.getString("formatted_address"));
+                        String object1 = object.getString("geometry");
+                        JSONObject object2 = new JSONObject(object1);
 
-            try {
-                jObject = new JSONObject(jsonData[0]);
-                Log.d("ParserTask",jsonData[0].toString());
-                DataParser parser = new DataParser();
-                Log.d("ParserTask", parser.toString());
+                        String location = object2.getString("location");
 
-                routes = parser.parse(jObject);
-                Log.d("ParserTask","Executing routes");
-                Log.d("ParserTask",routes.toString());
+                        JSONObject object3 = new JSONObject(location);
+                        String lat = object3.getString("lat");
+                        String lng = object3.getString("lng");
 
-            } catch (Exception e) {
-                Log.d("ParserTask",e.toString());
-                e.printStackTrace();
-            }
-            return routes;
-        }
-        @Override
-        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
-            ArrayList<LatLng> points;
-            PolylineOptions lineOptions = null;
+                        LatLng latLng = new LatLng(Float.parseFloat(lat),Float.parseFloat(lng));
+                        Marker marker = mMap.addMarker(new MarkerOptions().position(latLng));
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,16));
+                    }
 
-            for (int i = 0; i < result.size(); i++) {
-                points = new ArrayList<>();
-                lineOptions = new PolylineOptions();
-
-                List<HashMap<String, String>> path = result.get(i);
-
-                for (int j = 0; j < path.size(); j++) {
-                    HashMap<String, String> point = path.get(j);
-
-                    double lat = Double.parseDouble(point.get("lat"));
-                    double lng = Double.parseDouble(point.get("lng"));
-                    LatLng position = new LatLng(lat, lng);
-
-                    points.add(position);
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-
-                lineOptions.addAll(points);
-                lineOptions.width(10);
-                lineOptions.color(Color.RED);
-
-                Log.d("onPostExecute","onPostExecute lineoptions decoded");
-
             }
-
-            if(lineOptions != null) {
-                mMap.addPolyline(lineOptions);
-            }
-            else {
-                Log.d("onPostExecute","without Polylines drawn");
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("lỗi",error.getMessage() );
             }
         }
+        );
+        requestQueue.add(stringRequest);
     }
+    public void ThongTinViTri(String diachi)
+    {
+        String point = "https://maps.googleapis.com/maps/api/place/textsearch/json?query="+diachi+"&key=AIzaSyDNI_ZWPqvdS6r6gPVO50I4TlYkfkZdXh8";
+        final RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, point, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    String results =jsonObject.getString("results");
+                    JSONArray array = new JSONArray(results);
 
-    protected synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-        mGoogleApiClient.connect();
-    }
+                    for (int i=0;i<array.length();i++)
+                    {
+                        JSONObject object = array.getJSONObject(i);
+                        edtAddress.setText(object.getString("formatted_address"));
+                    }
 
-    @Override
-    public void onConnected(Bundle bundle) {
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(1000);
-        mLocationRequest.setFastestInterval(1000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, (com.google.android.gms.location.LocationListener) this);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("lỗi",error.getMessage() );
+            }
         }
-
+        );
+        requestQueue.add(stringRequest);
     }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
     @Override
     public void onLocationChanged(Location location) {
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-        hientai = new LatLng(location.getLongitude(),location.getLatitude());
-//        Toast.makeText(this, hientai.latitude+"", Toast.LENGTH_SHORT).show();
-//        Marker marker= mMap.addMarker(
-//                new MarkerOptions()
-//                        .position(hientai)
-//                        .title("hien tai"));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hientai,16));
-//        marker.showInfoWindow();
-        String url = getUrl(supham, hientai);
-        Log.d("onMapClick", url.toString());
-        FetchUrl FetchUrl = new FetchUrl();
-        FetchUrl.execute(url);
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(hientai));
-//        mMap.animateCamera(CameraUpdateFactory.zoomTo(16));
-        if (mGoogleApiClient != null) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, (com.google.android.gms.location.LocationListener) this);
-        }
 
     }
 
@@ -272,59 +324,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
+    public void onConnected(@Nullable Bundle bundle) {
 
-    }
-
-    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
-    public boolean checkLocationPermission(){
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_LOCATION);
-
-
-            } else {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_LOCATION);
-            }
-            return false;
-        } else {
-            return true;
-        }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_LOCATION: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+    public void onConnectionSuspended(int i) {
 
-                    if (ContextCompat.checkSelfPermission(this,
-                            Manifest.permission.ACCESS_FINE_LOCATION)
-                            == PackageManager.PERMISSION_GRANTED) {
+    }
 
-                        if (mGoogleApiClient == null) {
-                            buildGoogleApiClient();
-                        }
-                        mMap.setMyLocationEnabled(true);
-                    }
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
-                } else {
+    }
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
 
-                    Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
-                }
-                return;
-            }
-        }
     }
 }

@@ -53,7 +53,7 @@ public class PasswordActivity extends AppCompatActivity {
             if(aBoolean)
             {
                 Toast.makeText(PasswordActivity.this, "Đăng kí thành công!", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(PasswordActivity.this,MainActivity.class);
+                Intent intent = new Intent(PasswordActivity.this,LoginActivity.class);
                 startActivity(intent);
             }
             else

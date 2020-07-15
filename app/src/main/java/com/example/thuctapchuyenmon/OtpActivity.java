@@ -42,7 +42,7 @@ public class OtpActivity extends AppCompatActivity {
         btnTiepTuc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(edtSo1.getText().toString().equals("123456"))
+                if(edtSo1.getText().toString().equals(code))
                 {
                     Intent intent = new Intent(OtpActivity.this,PasswordActivity.class);
                     intent.putExtra("sdt",phoneNumber);
@@ -60,7 +60,7 @@ public class OtpActivity extends AppCompatActivity {
         edtSo1 = findViewById(R.id.editSo1);
         intent = getIntent();
         phoneNumber = intent.getStringExtra("sdt");
-        //sendVerificationCode(phoneNumber);
+        sendVerificationCode(phoneNumber);
     }
     private void sendVerificationCode(String mobile) {
         PhoneAuthProvider.getInstance().verifyPhoneNumber(

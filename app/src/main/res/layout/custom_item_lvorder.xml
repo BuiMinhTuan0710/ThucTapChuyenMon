@@ -8,7 +8,7 @@
     android:weightSum="10"
     android:orientation="horizontal">
     <com.makeramen.roundedimageview.RoundedImageView
-        android:id="@+id/imgFoodNew"
+        android:id="@+id/imgItemLV"
         android:layout_weight="3"
         android:layout_width="80dp"
         android:layout_height="100dp"
@@ -18,14 +18,14 @@
     <LinearLayout
         android:layout_marginStart="@dimen/margin10"
         android:layout_weight="5"
-        android:layout_gravity="center"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/txtNameFoodNew"
-            android:layout_width="wrap_content"
+            android:id="@+id/txtNameItemLV"
+            android:layout_width="match_parent"
+            android:gravity="center"
             android:ellipsize="end"
             android:maxLines="1"
             android:layout_height="wrap_content"
@@ -34,12 +34,26 @@
             android:textSize="@dimen/text_size_20" />
 
         <LinearLayout
-            android:layout_marginTop="@dimen/size5dp"
-            android:orientation="horizontal"
+            android:gravity="center"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            >
             <TextView
-                android:id="@+id/txtGiaSanPham"
+                android:id="@+id/txtSizeItemLV"
+                android:layout_width="wrap_content"
+                android:layout_marginStart="@dimen/size5dp"
+                android:background="#fff"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:maxLength="20"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textStyle="bold"
+                android:textColor="@color/colorBlue"
+                android:text="Size M"
+                android:textSize="@dimen/text_size_15" />
+            <TextView
+                android:id="@+id/txtGiaItemLV"
                 android:layout_width="wrap_content"
                 android:layout_marginStart="@dimen/size5dp"
                 android:background="#fff"
@@ -53,28 +67,17 @@
                 android:textColor="@color/colorBlue"
                 android:text=" 40000d"
                 android:textSize="@dimen/text_size_15" />
-            <TextView
-                android:id="@+id/txtMaSPFood"
-                android:visibility="gone"
-                android:layout_width="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/oswald"
-                android:text="Gà nướng"
-                android:textSize="@dimen/text_size_20" />
         </LinearLayout>
+        <TextView
+            android:id="@+id/txtSoLuongItemLV"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/oswald"
+            android:textStyle="bold"
+            android:text="Số lương: 1"
+            android:textSize="@dimen/text_size_20" />
     </LinearLayout>
-    <Button
-        android:id="@+id/btnOrder"
-        android:layout_weight="2"
-        android:layout_gravity="center"
-        android:textAllCaps="false"
-        android:textColor="@color/colorWhite"
-        android:text="order"
-        android:textSize="12sp"
-        android:background="@drawable/custom_round_button"
-        android:layout_width="@dimen/margin50"
-        android:layout_height="wrap_content"/>
-
 </LinearLayout>

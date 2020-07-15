@@ -1,6 +1,7 @@
 package com.example.model;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 
+import com.example.thuctapchuyenmon.DoiMatKhauActivity;
 import com.example.thuctapchuyenmon.R;
 import com.jpardogo.android.googleprogressbar.library.GoogleProgressBar;
 
@@ -19,8 +21,8 @@ public class ProfileFragment extends Fragment {
     private GoogleProgressBar progressBarProfile;
     private ImageView imgProfile, imageProfileUpload;
     private LinearLayout layoutChangePassword;
-    private String realPathImages;
-    private Dialog dialogChanePass;
+    public String makh;
+    public static final int REQUEST_CODE=117;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -32,6 +34,14 @@ public class ProfileFragment extends Fragment {
     }
     private void addEvents(View v) {
         txtNameProfile.setText("Minh Tuấn");
+        layoutChangePassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), DoiMatKhauActivity.class);
+                intent.putExtra("makh",makh);
+                startActivityForResult(intent,REQUEST_CODE);
+            }
+        });
     }
     private void addViews(View v) {
         txtNameProfile = v.findViewById(R.id.txtNameProfile);

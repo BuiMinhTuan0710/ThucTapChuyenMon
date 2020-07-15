@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".AllFoodMainActivity">
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/edtSearchAll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:inputType="text"
+        android:layout_margin="@dimen/margin10"
+        android:imeOptions="actionSearch"
+        android:background="@drawable/custom_edittext_round"
+        android:drawableStart="@drawable/ic_search_24dp"
+        android:hint="search" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin20"
+        android:fontFamily="@font/oswald"
+        android:text="All Food"
+        android:textColor="@color/colorOrange"
+        android:textSize="@dimen/text_size_50" />
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        >
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewAllFoodPaging"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/margin10" />
+        <com.jpardogo.android.googleprogressbar.library.GoogleProgressBar
+            android:id="@+id/progressAllFood"
+            android:visibility="gone"
+            android:background="@drawable/round_icon_cart"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="top|center"
+            type="nexus_rotation_cross"/>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</LinearLayout>

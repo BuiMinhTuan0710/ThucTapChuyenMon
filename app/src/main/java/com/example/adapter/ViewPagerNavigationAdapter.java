@@ -20,7 +20,6 @@ public class ViewPagerNavigationAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         return mFragmentList.get(position);
     }
-
     @Override
     public int getCount() {
         return mFragmentList.size();

@@ -1,33 +1,41 @@
 package com.example.model;
 
-import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.TranslateAnimation;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chabbal.slidingdotsplash.SlidingSplashView;
 import com.example.adapter.SanPhamAdapter;
+import com.example.adapter.SearchAdapter;
 import com.example.adapter.ThongTinSanPhamAdapter;
 import com.example.database.connect;
+import com.example.thuctapchuyenmon.AllFoodMainActivity;
+import com.example.thuctapchuyenmon.CartActivity;
+import com.example.thuctapchuyenmon.ChonSanPhamActivity;
 import com.example.thuctapchuyenmon.ChucNangActivity;
 import com.example.thuctapchuyenmon.R;
 import com.google.android.material.textfield.TextInputEditText;
@@ -37,20 +45,32 @@ import com.nex3z.notificationbadge.NotificationBadge;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExploreFragment extends Fragment {
+public class ExploreFragment extends Fragment{
     private RecyclerView recyclerSale, recyclerMilkTea;
     private SlidingSplashView splashExplore;
     private List<SanPham> productsSale, productsMilkTea;
     private GoogleProgressBar progressBarExplore;
     private static NotificationBadge badge;
     private TextInputEditText edtSearch;
+    private TextView txtDanhMuc;
+    private SearchAdapter searchAdapter;
+    private List<ChiTietSanPham>ds_SanPhamSearch=new ArrayList<>();
+    FrameLayout framBadge;
+    public String MaKhachHang;
     private NestedScrollView nestedScrollMenu;
     TextView txtTenDanhMuc;
+    String simpleFileName;
     ThongTinSanPhamAdapter adapter;
     SanPhamAdapter sanPhamAdapter;
+    Button btnViewAllProduct;
+    public static final int REQUEST_CODE=115;
+    public ArrayList<String>ds_SanPhamChon = new ArrayList<>();
     private androidx.appcompat.widget.Toolbar toolbarExplore;
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -59,7 +79,214 @@ public class ExploreFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_explore, container, false);
         addViews(view);
         onScrollListener();
+        addEvents();
         return view;
+    }
+
+
+    private String readData() {
+        try {
+            FileInputStream in = getActivity().openFileInput(simpleFileName);
+
+            BufferedReader br= new BufferedReader(new InputStreamReader(in));
+
+            StringBuilder sb= new StringBuilder();
+            String s= null;
+            while((s= br.readLine())!= null)  {
+                sb.append(s);
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            return "0";
+        }
+    }
+    private void addEvents() {
+
+        edtSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    DialogLoading.LoadingGoogle(true, progressBarExplore);
+                    SearchItems();
+                }
+                return true;
+            }
+        });
+
+        edtSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(s.length()==0)
+                {
+                    ds_SanPhamSearch = new ArrayList<>();
+                    recyclerSale.setAdapter(sanPhamAdapter);
+                    txtDanhMuc.setText("Sale");
+                    recyclerMilkTea.setVisibility(View.VISIBLE);
+                    txtTenDanhMuc.setVisibility(View.VISIBLE);
+                    btnViewAllProduct.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+        recyclerMilkTea.addOnItemTouchListener(
+                new RecyclerItemClickListener(getActivity(), recyclerMilkTea ,new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override public void onItemClick(View view, int position) {
+                        final TextView txtMaSP = view.findViewById(R.id.txtMaSPFood);
+                        masp = txtMaSP.getText().toString();
+                        ThongTinChiTietSP thongTinChiTietSP = new ThongTinChiTietSP();
+                        thongTinChiTietSP.execute(masp);
+                    }
+
+                    @Override public void onLongItemClick(View view, int position) {
+                        // do whatever
+                    }
+                })
+        );
+        recyclerSale.addOnItemTouchListener(
+                new RecyclerItemClickListener(getActivity(), recyclerSale ,new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override public void onItemClick(View view, int position) {
+                        if(ds_SanPhamSearch.size()==0)
+                        {
+                            final TextView txtMaSP;
+                            txtMaSP = view.findViewById(R.id.txtMaSPSale);
+                            masp = txtMaSP.getText().toString();
+                            ThongTinChiTietSP thongTinChiTietSP = new ThongTinChiTietSP();
+                            thongTinChiTietSP.execute(masp);
+                        }
+                        else
+                        {
+                            masp = ds_SanPhamSearch.get(position).getMasp();
+                            ThongTinChiTietSP thongTinChiTietSP = new ThongTinChiTietSP();
+                            thongTinChiTietSP.execute(masp);
+                        }
+                    }
+
+                    @Override public void onLongItemClick(View view, int position) {
+                        // do whatever
+                    }
+                })
+        );
+        framBadge.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), CartActivity.class);
+                intent.putExtra("makh",MaKhachHang);
+                startActivity(intent);
+            }
+        });
+
+        btnViewAllProduct.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), AllFoodMainActivity.class);
+                intent.putExtra("makh",MaKhachHang);
+                startActivityForResult(intent,110);
+            }
+        });
+    }
+
+    private void SearchItems() {
+        if(edtSearch.getText().length()>0)
+        {
+            ds_SanPhamSearch = new ArrayList<>();
+            searchAdapter = new SearchAdapter(ds_SanPhamSearch,R.layout.custom_item_search,getActivity());
+            recyclerSale.setAdapter(searchAdapter);
+            txtDanhMuc.setText("Sản Phẩm");
+            recyclerMilkTea.setVisibility(View.GONE);
+            txtTenDanhMuc.setVisibility(View.INVISIBLE);
+            btnViewAllProduct.setVisibility(View.GONE);
+            SearchSanPham searchSanPham = new SearchSanPham();
+            searchSanPham.execute(edtSearch.getText().toString());
+
+        }
+    }
+
+    class SearchSanPham extends AsyncTask<String,Void,List<ChiTietSanPham>>
+    {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(List<ChiTietSanPham> chiTietSanPhams) {
+            DialogLoading.LoadingGoogle(false,progressBarExplore);
+            for (ChiTietSanPham item : chiTietSanPhams)
+            {
+                ds_SanPhamSearch.add(item);
+            }
+            searchAdapter.notifyDataSetChanged();
+            super.onPostExecute(chiTietSanPhams);
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected List<ChiTietSanPham> doInBackground(String... strings) {
+            List<ChiTietSanPham> ds = new ArrayList<>();
+            List<SanPham>ds_SanPham = new ArrayList<>();
+            try {
+                String paramsp = "tensp="+strings[0];
+                connect connect = new connect("TimKiemSanPham");
+                NodeList nodeList = connect.getDataParameter(paramsp,"SanPham");
+                for (int i=0;i<nodeList.getLength();i++) {
+                    Element element = (Element) nodeList.item(i);
+                    String masp = element.getElementsByTagName("MaSP").item(0).getTextContent();
+                    String tensp = element.getElementsByTagName("TenSanPham").item(0).getTextContent();
+                    String hinhanh = element.getElementsByTagName("hinhanh").item(0).getTextContent();
+                    SanPham sp = new SanPham(masp,tensp,hinhanh,0);
+                    ds_SanPham.add(sp);
+                }
+                for(SanPham item : ds_SanPham)
+                {
+                    String params = "masp="+item.masp;
+                    connect connect1 = new connect("ds_ChiTiet");
+                    NodeList nodeList1 = connect1.getDataParameter(params,"ChiTietSanPham");
+                    Element element = (Element) nodeList1.item(0);
+                    String size = element.getElementsByTagName("Size").item(0).getTextContent();
+                    String gia = element.getElementsByTagName("DonGia").item(0).getTextContent();
+
+                    String paramsgia = "masp="+item.masp+"&size="+size;
+                    connect connect2 = new connect("getGiaThuc");
+                    NodeList nodeList2 = connect2.getDataParameter(paramsgia,"int");
+                    String giathuc = nodeList2.item(0).getTextContent();
+                    ChiTietSanPham chiTietSanPham = new ChiTietSanPham(item.masp,item.tensp,size,item.hinhsp,Integer.parseInt(gia),Integer.parseInt(giathuc));
+                    ds.add(chiTietSanPham);
+                }
+                return ds;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if(requestCode==REQUEST_CODE && resultCode== Activity.RESULT_OK)
+        {
+            ChiTietSanPham chiTietSanPham = (ChiTietSanPham) data.getSerializableExtra("ChiTietSP");
+            int soluong = data.getIntExtra("soluong",0);
+            if(soluong>0)
+            {
+                badge.setNumber(1);
+                String sanpham = chiTietSanPham.getMasp().trim()+"-"+chiTietSanPham.getSize().trim()+"-"+soluong;
+                ds_SanPhamChon.add(sanpham);
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -74,7 +301,6 @@ public class ExploreFragment extends Fragment {
                     toolbarExplore.setVisibility(View.VISIBLE);
                     toolbarExplore.setTitle("UTC2 Food");
                     ChucNangActivity.navigation.setVisibility(View.GONE);
-
                     TranslateAnimation animate = new TranslateAnimation(
                             0,
                             0,
@@ -102,6 +328,7 @@ public class ExploreFragment extends Fragment {
     }
 
     private void addViews(View view) {
+        simpleFileName = MaKhachHang.trim()+".txt";
         nestedScrollMenu = view.findViewById(R.id.nestedScrollMenu);
         toolbarExplore = view.findViewById(R.id.toolbarExplore);
         recyclerSale = view.findViewById(R.id.recyclerHot);
@@ -110,12 +337,15 @@ public class ExploreFragment extends Fragment {
         recyclerMilkTea = view.findViewById(R.id.recyclerMilkTea);
         edtSearch = view.findViewById(R.id.edtSearch);
         txtTenDanhMuc = view.findViewById(R.id.txtTenDanhMuc);
+        txtDanhMuc = view.findViewById(R.id.txtDanhMuc);
         TenLoai tenLoai = new TenLoai();
         tenLoai.execute();
-        FrameLayout framBadge = view.findViewById(R.id.layout_Badge);
+        framBadge = view.findViewById(R.id.layout_Badge);
         badge = framBadge.findViewById(R.id.badge);
-        Button btnViewAllProduct = view.findViewById(R.id.btnViewAllProduct);
 
+        int number = Integer.parseInt(readData());
+        badge.setNumber(number);
+        btnViewAllProduct = view.findViewById(R.id.btnViewAllProduct);
 
         productsSale = new ArrayList<>();
         productsMilkTea = new ArrayList<>();
@@ -131,6 +361,59 @@ public class ExploreFragment extends Fragment {
         thongTinSanPham.execute();
     }
 
+    String masp ="";
+
+    class ThongTinChiTietSP extends AsyncTask<String,Void, Integer>
+    {
+        @Override
+        protected void onPreExecute() {
+            DialogLoading.LoadingGoogle(true,progressBarExplore);
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Integer chiTietSanPhams) {
+            DialogLoading.LoadingGoogle(false,progressBarExplore);
+            Intent intent = new Intent(getContext(), ChonSanPhamActivity.class);
+            intent.putExtra("masp",masp);
+            intent.putExtra("soluong",chiTietSanPhams);
+            intent.putExtra("makh",MaKhachHang);
+            startActivityForResult(intent,REQUEST_CODE);
+            super.onPostExecute(chiTietSanPhams);
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onCancelled(Integer chiTietSanPhams) {
+            super.onCancelled(chiTietSanPhams);
+        }
+
+        @Override
+        protected Integer doInBackground(String... strings) {
+            List<ChiTietSanPham> ds = new ArrayList<>();
+            String params = "masp="+strings[0];
+            try {
+                connect connect = new connect("ds_ChiTiet");
+                NodeList nodeList = connect.getDataParameter(params,"ChiTietSanPham");
+                for (int i=0;i<nodeList.getLength();i++) {
+                    Element element = (Element) nodeList.item(i);
+                    String size = element.getElementsByTagName("Size").item(0).getTextContent();
+                    String gia = element.getElementsByTagName("DonGia").item(0).getTextContent();
+                    ChiTietSanPham chiTietSanPham = new ChiTietSanPham(strings[0], size, Integer.parseInt(gia));
+                    ds.add(chiTietSanPham);
+                }
+                return ds.size();
+            }
+            catch (Exception e)
+            {
+                return 0;
+            }
+        }
+    }
     class TenLoai extends AsyncTask<Void,Void,String>
     {
         @Override
@@ -184,7 +467,6 @@ public class ExploreFragment extends Fragment {
                     sanPhams) {
                 productsSale.add(sp);
             }
-            Log.e("san pham",productsSale.size()+"" );
             recyclerSale.setAdapter(sanPhamAdapter);
             sanPhamAdapter.notifyDataSetChanged();
             DialogLoading.LoadingGoogle(true,progressBarExplore);
@@ -318,5 +600,11 @@ public class ExploreFragment extends Fragment {
                 return null;
             }
         }
+    }
+    @Override
+    public void onResume() {
+        int number = Integer.parseInt(readData());
+        badge.setNumber(number);
+        super.onResume();
     }
 }
