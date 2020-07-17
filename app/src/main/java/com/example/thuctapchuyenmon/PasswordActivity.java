@@ -5,20 +5,24 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.database.connect;
+import com.google.android.material.textfield.TextInputEditText;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import es.dmoral.toasty.Toasty;
+
 public class PasswordActivity extends AppCompatActivity {
 
     Button btnXacNhanPass;
-    EditText edtNewPass,edtConfirm;
+    TextInputEditText edtNewPass,edtConfirm;
     String phoneNuber;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,11 +36,10 @@ public class PasswordActivity extends AppCompatActivity {
         btnXacNhanPass.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(edtConfirm.getText().toString().equals(edtNewPass.getText().toString()))
+                if(checkValid())
                 {
                     insertKH insertKH = new insertKH();
                     insertKH.execute();
-
                 }
             }
         });
@@ -52,13 +55,13 @@ public class PasswordActivity extends AppCompatActivity {
         protected void onPostExecute(Boolean aBoolean) {
             if(aBoolean)
             {
-                Toast.makeText(PasswordActivity.this, "Đăng kí thành công!", Toast.LENGTH_SHORT).show();
+                Toasty.success(PasswordActivity.this, "Đăng kí thành công!", Toasty.LENGTH_SHORT).show();
                 Intent intent = new Intent(PasswordActivity.this,LoginActivity.class);
                 startActivity(intent);
             }
             else
             {
-                Toast.makeText(PasswordActivity.this, "Đăng kí thất bại!", Toast.LENGTH_SHORT).show();
+                Toasty.error(PasswordActivity.this, "Đăng kí thất bại!", Toasty.LENGTH_SHORT).show();
             }
             super.onPostExecute(aBoolean);
         }
@@ -101,6 +104,28 @@ public class PasswordActivity extends AppCompatActivity {
             return false;
         }
     }
+    private boolean checkValid(){
+        String newPassword = edtNewPass.getText().toString().trim();
+        String newPasswordAgain = edtConfirm.getText().toString().trim();
+        if (newPassword.length() == 0) {
+            edtNewPass.setError("New Password Invalid");
+            edtNewPass.requestFocus();
+            return false;
+        }
+        else if(newPasswordAgain.length()==0)
+        {
+            edtConfirm.setError("New Password Again Invalid");
+            edtConfirm.requestFocus();
+            return false;
+        }
+        else if(!newPassword.equals(newPasswordAgain))
+        {
+            edtConfirm.setError("password incorrect");
+            edtConfirm.requestFocus();
+            return false;
+        }
+        return  true;
+    }
     private void addViews() {
         btnXacNhanPass = findViewById(R.id.btnXacNhanPass);
         edtConfirm = findViewById(R.id.edtNewPassConfirm);
@@ -108,5 +133,6 @@ public class PasswordActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         phoneNuber = intent.getStringExtra("sdt");
+        Log.e("phone", phoneNuber );
     }
 }

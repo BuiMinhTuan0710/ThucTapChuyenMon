@@ -1,23 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     >
-
-    <TextView
-        android:textColor="@color/colorOrange"
-        android:textSize="@dimen/text_size_50"
-        android:fontFamily="@font/oswald"
-        android:layout_margin="@dimen/margin20"
-        android:text="Hóa Đơn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerMyorderCT"
-        android:layout_margin="@dimen/margin10"
+    <fragment
+        android:visibility="gone"
+        android:id="@+id/mapThongTin"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
     <com.jpardogo.android.googleprogressbar.library.GoogleProgressBar
         android:id="@+id/progressOrderCT"
         android:visibility="gone"
@@ -26,4 +18,42 @@
         android:layout_height="50dp"
         android:layout_gravity="center"
         type="nexus_rotation_cross"/>
-</LinearLayout>
+    <LinearLayout
+        android:id="@+id/bodyChiTiet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@drawable/custom_border_login"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="@font/oswald"
+            android:text="Thông tin hóa đơn"
+            android:textColor="@color/colorBlack"
+            android:textSize="30sp" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerMyorderCT"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            />
+
+
+        <Button
+            android:layout_gravity="center"
+            android:layout_marginBottom="@dimen/margin10"
+            android:id="@+id/btnHuyOrder"
+            android:layout_width="250dp"
+            android:layout_height="@dimen/margin50"
+            android:layout_marginRight="@dimen/margin20"
+            android:layout_marginTop="@dimen/margin20"
+            android:layout_marginLeft="@dimen/margin20"
+            android:background="@drawable/custom_round_button"
+            android:text="Hủy hóa đơn"
+            android:textAllCaps="false"
+            android:textColor="@color/colorWhite"
+            android:textSize="@dimen/text_size_20" />
+    </LinearLayout>
+</FrameLayout>

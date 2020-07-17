@@ -1,6 +1,7 @@
 package com.example.thuctapchuyenmon;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -12,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.adapter.ViewPagerNavigationAdapter;
+import com.example.database.connect;
+import com.example.model.DialogLoading;
 import com.example.model.ExploreFragment;
 import com.example.model.MyOrderFlagment;
 import com.example.model.ProfileFragment;
@@ -21,6 +24,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 public class ChucNangActivity extends AppCompatActivity {
     private ViewPager viewPager;
@@ -63,14 +69,16 @@ public class ChucNangActivity extends AppCompatActivity {
     }
 
     private void setupViewPager(ViewPager viewPager) {
+        Intent intent = getIntent();
+        String makh = intent.getStringExtra("makh");
+        Log.e("makhachhang",makh );
         ViewPagerNavigationAdapter adapter = new ViewPagerNavigationAdapter(getSupportFragmentManager());
         ExploreFragment exploreFragment = new ExploreFragment();
-        Intent intent = getIntent();
-        exploreFragment.MaKhachHang = intent.getStringExtra("makh");
         ProfileFragment profileFragment = new ProfileFragment();
-        profileFragment.makh = intent.getStringExtra("makh");
         MyOrderFlagment myOrderFlagment = new MyOrderFlagment();
-        myOrderFlagment.MaKhachHang = intent.getStringExtra("makh");
+        exploreFragment.MaKhachHang = makh ;
+        profileFragment.makh =makh;
+        myOrderFlagment.MaKhachHang = makh;
         adapter.addFragment(exploreFragment);
         adapter.addFragment(myOrderFlagment);
         adapter.addFragment(profileFragment);

@@ -13,4 +13,5 @@
     <color name="colorActive">#CD3EC944</color>
     <color name="colorStroke">#979797</color>
     <color name="colorStrokeTransparent">#75E6E5E5</color>
+    <color name="colorVerify">#0B0B61</color>
 </resources>

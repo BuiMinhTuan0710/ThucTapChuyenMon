@@ -53,16 +53,32 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/txtNameCart"
+
+                android:id="@+id/txtDeleteFood"
+                android:layout_gravity="center"
+                android:gravity="right"
+                android:drawableRight="@drawable/ic_clear_black_24dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:maxLines="1"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="10dp"
-                android:textColor="#000000"
-                android:textSize="25sp"
-                android:textStyle="bold" />
+                >
+                <TextView
+                    android:layout_weight="1"
+                    android:id="@+id/txtNameCart"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="10dp"
+                    android:textColor="#000000"
+                    android:textSize="25sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
 
             <LinearLayout
                 android:layout_width="wrap_content"

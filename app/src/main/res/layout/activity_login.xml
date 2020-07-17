@@ -6,6 +6,7 @@
     android:background="@color/colorBlack"
     android:weightSum="10">
     <ImageView
+        android:id="@+id/imgTopAnimation"
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:src="@drawable/background"
@@ -70,6 +71,7 @@
             android:textSize="@dimen/text_size_20" />
 
         <TextView
+            android:onClick="forgotPass"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -90,7 +92,7 @@
             android:layout_marginTop="10dp">
 
             <Button
-                android:onClick="clickGoogle"
+                android:onClick="clickSignInGoogle"
                 android:layout_width="132dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"

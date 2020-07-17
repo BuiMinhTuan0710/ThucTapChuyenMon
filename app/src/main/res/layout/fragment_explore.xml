@@ -23,12 +23,13 @@
                 android:layout_height="wrap_content">
 
 
-                <com.chabbal.slidingdotsplash.SlidingSplashView
-                    android:id="@+id/splashExplore"
+                <ViewFlipper
+                    android:background="@color/colorWhite"
+                    android:id="@+id/ViewFlipper"
                     android:layout_width="match_parent"
                     android:layout_height="200dp">
 
-                </com.chabbal.slidingdotsplash.SlidingSplashView>
+                </ViewFlipper>
 
             </FrameLayout>
 

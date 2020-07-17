@@ -13,12 +13,16 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -41,6 +45,7 @@ import com.example.thuctapchuyenmon.R;
 import com.google.android.material.textfield.TextInputEditText;
 import com.jpardogo.android.googleprogressbar.library.GoogleProgressBar;
 import com.nex3z.notificationbadge.NotificationBadge;
+import com.squareup.picasso.Picasso;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -53,7 +58,7 @@ import java.util.List;
 
 public class ExploreFragment extends Fragment{
     private RecyclerView recyclerSale, recyclerMilkTea;
-    private SlidingSplashView splashExplore;
+    private ViewFlipper ViewFlipper;
     private List<SanPham> productsSale, productsMilkTea;
     private GoogleProgressBar progressBarExplore;
     private static NotificationBadge badge;
@@ -332,12 +337,14 @@ public class ExploreFragment extends Fragment{
         nestedScrollMenu = view.findViewById(R.id.nestedScrollMenu);
         toolbarExplore = view.findViewById(R.id.toolbarExplore);
         recyclerSale = view.findViewById(R.id.recyclerHot);
-        splashExplore = view.findViewById(R.id.splashExplore);
+        ViewFlipper = view.findViewById(R.id.ViewFlipper);
         progressBarExplore = view.findViewById(R.id.progressExplore);
         recyclerMilkTea = view.findViewById(R.id.recyclerMilkTea);
         edtSearch = view.findViewById(R.id.edtSearch);
         txtTenDanhMuc = view.findViewById(R.id.txtTenDanhMuc);
         txtDanhMuc = view.findViewById(R.id.txtDanhMuc);
+
+        acctionViewFlipper();
         TenLoai tenLoai = new TenLoai();
         tenLoai.execute();
         framBadge = view.findViewById(R.id.layout_Badge);
@@ -359,6 +366,28 @@ public class ExploreFragment extends Fragment{
         adapter = new ThongTinSanPhamAdapter(productsMilkTea,R.layout.custom_item_food,getActivity());
         ThongTinSanPham thongTinSanPham = new ThongTinSanPham();
         thongTinSanPham.execute();
+    }
+
+    private void acctionViewFlipper() {
+        ArrayList<String>quangcao = new ArrayList<>();
+        quangcao.add("https://intruongphu.com/images/attachment/2849poster-quang-cao-do-an.jpg");
+        quangcao.add("https://i.pinimg.com/originals/3c/79/c6/3c79c6f54cf25a01b3dfefb0b90e7e07.jpg");
+        quangcao.add("https://bizweb.dktcdn.net/100/060/439/files/poster-quang-cao-mon-an-020.jpg?v=1470871779199");
+        quangcao.add("https://www.cukcuk.vn/wp-content/uploads/2019/06/41936420_2418111258213885_3981372350531633152_o.jpg");
+        for (String item :
+                quangcao) {
+
+            ImageView imageView = new ImageView(getActivity());
+            Picasso.get().load(item).into(imageView);
+            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+            ViewFlipper.addView(imageView);
+        }
+        ViewFlipper.setFlipInterval(5000);
+        ViewFlipper.setAutoStart(true);
+        Animation animationInRight = AnimationUtils.loadAnimation(getActivity(),R.anim.slide_in_right);
+        Animation animationOutRight = AnimationUtils.loadAnimation(getActivity(),R.anim.slide_out_right);
+        ViewFlipper.setInAnimation(animationInRight);
+        ViewFlipper.setOutAnimation(animationOutRight);
     }
 
     String masp ="";

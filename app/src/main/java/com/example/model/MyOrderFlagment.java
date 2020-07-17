@@ -116,6 +116,10 @@ public class MyOrderFlagment extends Fragment {
     }
     @Override
     public void onResume() {
+        hoaDonAdapter = new HoaDonAdapter(ds_HoaDon,R.layout.custom_item_myorder,getActivity());
+        DanhSachHoaDon danhSachHoaDon = new DanhSachHoaDon();
+        danhSachHoaDon.execute();
+        hoaDonAdapter.notifyDataSetChanged();
         super.onResume();
     }
 }

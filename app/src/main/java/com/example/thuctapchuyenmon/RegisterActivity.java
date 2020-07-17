@@ -1,10 +1,14 @@
 package com.example.thuctapchuyenmon;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -14,9 +18,19 @@ import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.database.connect;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskExecutors;
+import com.google.firebase.FirebaseException;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.PhoneAuthCredential;
+import com.google.firebase.auth.PhoneAuthProvider;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -31,16 +45,21 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-public class RegisterActivity extends AppCompatActivity {
+import es.dmoral.toasty.Toasty;
 
-    Button btnTiepTuc;
+public class RegisterActivity extends AppCompatActivity {
+    Button btnSubmitRegister;
     EditText edtSDT;
     String phoneNumber;
+    String code;
+    TextView edtOTP;
+    PhoneAuthProvider.ForceResendingToken token;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,20 +75,20 @@ public class RegisterActivity extends AppCompatActivity {
 
             }
 
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(s.length()==9)
+                if(s.length()==9||s.length()==10)
                 {
-                    phoneNumber = s.toString();
-                    btnTiepTuc.setEnabled(true);
+                    btnSubmitRegister.setEnabled(true);
+                    btnSubmitRegister.setBackground(getDrawable(R.drawable.custom_btn));
+                    btnSubmitRegister.setTextColor(getResources().getColor(R.color.colorWhite));
                 }
-                else if(s.length()==10)
+                else
                 {
-                    phoneNumber = s.toString();
-                    btnTiepTuc.setEnabled(true);
-                }
-                else {
-                    btnTiepTuc.setEnabled(false);
+                    btnSubmitRegister.setEnabled(false);
+                    btnSubmitRegister.setBackground(getDrawable(R.drawable.custom_verify));
+                    btnSubmitRegister.setTextColor(getResources().getColor(R.color.colorVerify));
                 }
             }
 
@@ -81,10 +100,9 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void addViews() {
-        btnTiepTuc = findViewById(R.id.btnTiepTuc);
+        btnSubmitRegister = findViewById(R.id.btnSubmitRegister);
         edtSDT = findViewById(R.id.edtSDT);
-        btnTiepTuc.setEnabled(false);
-        btnTiepTuc.setOnClickListener(new View.OnClickListener() {
+        btnSubmitRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 KiemTra kiemTra = new KiemTra();
@@ -92,6 +110,110 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
     }
+    private void clickRegister() {
+        final Dialog dialog = new Dialog(RegisterActivity.this);
+        dialog.setContentView(R.layout.alertdialog_register);
+        final Button btnYes = dialog.findViewById(R.id.btnRegister);
+        edtOTP = dialog.findViewById(R.id.edtOTPRegister);
+        edtOTP.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(s.length()==6)
+                {
+                    btnYes.setEnabled(true);
+                    btnYes.setBackground(getDrawable(R.drawable.custom_btn));
+                    btnYes.setTextColor(getResources().getColor(R.color.colorWhite));
+                }
+                else
+                {
+                    btnYes.setEnabled(false);
+                    btnYes.setBackground(getDrawable(R.drawable.custom_verify));
+                    btnYes.setTextColor(getResources().getColor(R.color.colorVerify));
+                }
+            }
+        });
+        btnYes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                KiemTraCode();
+            }
+        });
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.show();
+
+        String phone;
+        if(edtSDT.getText().length()==9)
+        {
+            phone = "+84"+edtSDT.getText().toString();
+            phoneNumber = "0"+edtSDT.getText().toString();
+        }
+        else
+        {
+            String sdt = edtSDT.getText().toString().substring(1,10);
+            phone = "+84"+sdt;
+            phoneNumber = "0"+sdt;
+        }
+        sendVerificationCode(phone);
+
+
+    }
+
+    private void sendVerificationCode(String mobile) {
+        PhoneAuthProvider.getInstance().verifyPhoneNumber(
+                mobile,
+                60,
+                TimeUnit.SECONDS,
+                TaskExecutors.MAIN_THREAD,
+                callbacks);
+    }
+    PhoneAuthProvider.OnVerificationStateChangedCallbacks callbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+        @Override
+        public void onCodeSent(@NonNull String s, @NonNull PhoneAuthProvider.ForceResendingToken forceResendingToken) {
+            super.onCodeSent(s, forceResendingToken);
+            code = s;
+            token = forceResendingToken;
+        }
+
+        @Override
+        public void onVerificationCompleted(@NonNull PhoneAuthCredential phoneAuthCredential) {
+
+        }
+
+        @Override
+        public void onVerificationFailed(@NonNull FirebaseException e) {
+            Log.e("lỗi ", e.getMessage() );
+        }
+    };
+    private void KiemTraCode() {
+        PhoneAuthCredential authCredential =PhoneAuthProvider.getCredential(code,edtOTP.getText().toString());
+        FirebaseAuth.getInstance().signInWithCredential(authCredential).addOnCompleteListener(RegisterActivity.this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                Toasty.success(RegisterActivity.this,"Verified Successful !",Toasty.LENGTH_LONG).show();
+                Intent intent = new Intent(RegisterActivity.this,PasswordActivity.class);
+                intent.putExtra("sdt",phoneNumber);
+                Log.e("phonenumber",phoneNumber );
+                startActivityForResult(intent,123);
+            }
+        }).addOnFailureListener(RegisterActivity.this, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toasty.error(RegisterActivity.this,"Verified Failed !",Toasty.LENGTH_LONG).show();
+            }
+        });
+    }
+
     class KiemTra extends AsyncTask<String,Void,Boolean>
     {
         @Override
@@ -103,11 +225,11 @@ public class RegisterActivity extends AppCompatActivity {
         protected void onPostExecute(Boolean aBoolean) {
             if(aBoolean)
             {
-                chuyenMaOTP();
+                clickRegister();
             }
             else
             {
-                Toast.makeText(RegisterActivity.this, "SDT đã tồn tại", Toast.LENGTH_SHORT).show();
+                Toasty.error(RegisterActivity.this, "SDT đã tồn tại", Toasty.LENGTH_SHORT).show();
             }
             super.onPostExecute(aBoolean);
         }
@@ -149,10 +271,5 @@ public class RegisterActivity extends AppCompatActivity {
             }
             return false;
         }
-    }
-    private void chuyenMaOTP() {
-        Intent intent = new Intent(RegisterActivity.this,OtpActivity.class);
-        intent.putExtra("sdt",phoneNumber);
-        startActivity(intent);
     }
 }

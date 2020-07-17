@@ -44,7 +44,6 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:18.0.0'
     implementation 'com.android.support:multidex:1.0.3'
     implementation 'com.google.android.material:material:1.0.0'
-    implementation 'com.facebook.android:facebook-android-sdk:[4,5)'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.jpardogo.googleprogressbar:library:1.2.0'
     implementation 'com.chabbal:slidingdotsplash:1.0.2'
@@ -53,5 +52,6 @@ dependencies {
     implementation 'com.makeramen:roundedimageview:2.3.0'
     implementation 'com.nex3z:notification-badge:1.0.2'
     implementation 'com.android.volley:volley:1.1.1'
+    implementation 'com.facebook.android:facebook-login:[5,6)'
 }
 apply plugin: 'com.google.gms.google-services'

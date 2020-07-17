@@ -74,6 +74,14 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
                 context.gioHang.QueryData("update Carts set SanPham = '"+sanpham+"' where SanPham ='"+sp+"'");
             }
         });
+        holder.txtDeleteFood.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String sanpham = ds_Cart.get(position).getMasp()+"-"+ds_Cart.get(position).getSize()+"-"+soluong;
+                context.openDiaLogDelete(sanpham);
+                ds_Cart.remove(position);
+            }
+        });
     }
 
     @Override
@@ -83,7 +91,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
     class ViewHolder extends RecyclerView.ViewHolder{
 
         RoundedImageView imgHinh;
-        TextView txtMaCart,txtNameCart,txtPriceCart,numberCart,txtSizeCart,increase,reduce;
+        TextView txtMaCart,txtNameCart,txtPriceCart,numberCart,txtSizeCart,increase,reduce,txtDeleteFood;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -95,6 +103,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
             numberCart = itemView.findViewById(R.id.numberCart);
             increase = itemView.findViewById(R.id.increase);
             reduce = itemView.findViewById(R.id.reduce);
+            txtDeleteFood = itemView.findViewById(R.id.txtDeleteFood);
         }
     }
 }

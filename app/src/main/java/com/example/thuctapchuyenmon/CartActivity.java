@@ -4,7 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -49,12 +51,61 @@ public class CartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cart);
         addViews();
+        addEvents();
+    }
+
+    private void addEvents() {
+        Cursor cursor = gioHang.getData("select * from Carts");
+        int soluong = 0;
+        String SanPham;
+        while (cursor.moveToNext())
+        {
+            SanPham=cursor.getString(1);
+            String[] sp = SanPham.split("-");
+            soluong+= Integer.parseInt(sp[2]);
+        }
+        outPut(soluong+"");
     }
 
     private void prepareDB() {
         gioHang = new GioHang(this,databaseName,null,1);
         gioHang.QueryData("CREATE TABLE IF NOT EXISTS Carts(Id INTEGER PRIMARY KEY AUTOINCREMENT,"+
                 "SanPham varchar(200))");
+    }
+    public  void openDiaLogDelete(final String name)
+    {
+        android.app.AlertDialog.Builder builder = new AlertDialog.Builder(CartActivity.this);
+        builder.setTitle("Confirm delete Carts");
+        builder.setMessage("Are you sure you want to delete this Carts ?");
+        builder.setIcon(android.R.drawable.ic_delete);
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int i) {
+                gioHang.QueryData("delete from Carts where SanPham ='"+name+"'");
+                dialog.dismiss();
+                reset();
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.create().show();
+    }
+    public void reset()
+    {
+        Cursor cursor = gioHang.getData("select * from Carts");
+        ds_SanPham.clear();
+        String SanPham;
+        while (cursor.moveToNext())
+        {
+            SanPham=cursor.getString(1);
+            ds_SanPham.add(SanPham);
+
+        }
+        cartAdapter.notifyDataSetChanged();
     }
     private void data() {
         intent = getIntent();
@@ -67,7 +118,26 @@ public class CartActivity extends AppCompatActivity {
         {
             String sl = intent.getStringExtra("soluong");
             String item = chiTietSanPham.getMasp().trim()+"-"+chiTietSanPham.getSize().trim()+"-"+sl;
-            gioHang.QueryData("insert into Carts values(null,'"+item+"')");
+            String kt = chiTietSanPham.getMasp().trim()+"-"+chiTietSanPham.getSize().trim();
+            if(KiemTraTonTai(kt))
+                gioHang.QueryData("insert into Carts values(null,'"+item+"')");
+            else
+            {
+                String querry = "select * from Carts where SanPham like '%"+kt+"%'";
+                Cursor cursor = gioHang.getData(querry);
+                while (cursor.moveToNext())
+                {
+                    int magio = cursor.getInt(0);
+                    String sanpham = cursor.getString(1);
+                    String[] sp = sanpham.split("-");
+                    int soluong = Integer.parseInt(sp[2]);
+                    soluong += Integer.parseInt(sl);
+                    sanpham = sp[0]+"-"+sp[1]+"-"+soluong;
+                    String qr = "update Carts set SanPham='"+sanpham+"' where id="+magio;
+                    gioHang.QueryData(qr);
+                }
+
+            }
         }
         Cursor cursor = gioHang.getData("select * from Carts");
         ds_SanPham = new ArrayList<>();
@@ -76,9 +146,15 @@ public class CartActivity extends AppCompatActivity {
         {
             SanPham=cursor.getString(1);
             ds_SanPham.add(SanPham);
-
         }
-        Log.e("ds",ds_SanPham.size()+"" );
+    }
+    public boolean KiemTraTonTai(String item)
+    {
+        String querry = "select * from Carts where SanPham like '%"+item+"%'";
+        Cursor cursor = gioHang.getData(querry);
+        if(cursor.getCount()>0)
+            return false;
+        return true;
     }
 
     public void outPut(String s)
@@ -95,7 +171,6 @@ public class CartActivity extends AppCompatActivity {
     }
     private void addViews() {
         data();
-        outPut(ds_SanPham.size()+"");
         btnOrderNow = findViewById(R.id.btnOrderCart);
         recyclerCart = findViewById(R.id.recyclerCart);
         recyclerCart.setLayoutManager(new GridLayoutManager(this, 1));
@@ -232,5 +307,20 @@ public class CartActivity extends AppCompatActivity {
             }
             return ds_cart;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Cursor cursor = gioHang.getData("select * from Carts");
+        int soluong = 0;
+        String SanPham;
+        while (cursor.moveToNext())
+        {
+            SanPham=cursor.getString(1);
+            String[] sp = SanPham.split("-");
+            soluong+= Integer.parseInt(sp[2]);
+        }
+        outPut(soluong+"");
+        super.onBackPressed();
     }
 }
