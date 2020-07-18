@@ -49,29 +49,45 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
         {
             holder.txtSizeCart.setVisibility(View.GONE);
         }
-
-        soluong = ds_Cart.get(position).getSoluong();
         holder.increase.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                soluong = ds_Cart.get(position).getSoluong();
                 soluong+=1;
                 holder.numberCart.setText(soluong+"");
                 String sanpham = ds_Cart.get(position).getMasp()+"-"+ds_Cart.get(position).getSize()+"-"+soluong;
                 String sp = ds_Cart.get(position).getMasp()+"-"+ds_Cart.get(position).getSize()+"-"+ds_Cart.get(position).getSoluong();
                 context.gioHang.QueryData("update Carts set SanPham = '"+sanpham+"' where SanPham ='"+sp+"'");
+                ds_Cart.get(position).setSoluong(soluong);
+                int tongtien = 0;
+                for (Cart item :
+                        ds_Cart) {
+                    tongtien+= item.getGia()*item.getSoluong();
+                }
+                context.txtTongTienCart.setText(tongtien+"đ");
             }
         });
         holder.reduce.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                soluong-=1;
+                soluong = ds_Cart.get(position).getSoluong();
                 if (soluong<=1)
+                {
                     soluong = 1;
+                    return;
+                }
+                soluong-=1;
                 holder.numberCart.setText(soluong+"");
                 String sanpham = ds_Cart.get(position).getMasp()+"-"+ds_Cart.get(position).getSize()+"-"+soluong;
                 String sp = ds_Cart.get(position).getMasp()+"-"+ds_Cart.get(position).getSize()+"-"+ds_Cart.get(position).getSoluong();
-                Log.e("SanPham",sanpham );
                 context.gioHang.QueryData("update Carts set SanPham = '"+sanpham+"' where SanPham ='"+sp+"'");
+                ds_Cart.get(position).setSoluong(soluong);
+                int tongtien = 0;
+                for (Cart item :
+                        ds_Cart) {
+                    tongtien+= item.getGia()*item.getSoluong();
+                }
+                context.txtTongTienCart.setText(tongtien+"đ");
             }
         });
         holder.txtDeleteFood.setOnClickListener(new View.OnClickListener() {

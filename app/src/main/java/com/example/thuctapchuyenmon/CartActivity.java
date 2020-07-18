@@ -46,6 +46,8 @@ public class CartActivity extends AppCompatActivity {
     String makh;
     CartAdapter cartAdapter;
     Button btnOrderNow;
+    public TextView txtTongTienCart;
+    List<Cart>ds_Cart = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -173,10 +175,10 @@ public class CartActivity extends AppCompatActivity {
         data();
         btnOrderNow = findViewById(R.id.btnOrderCart);
         recyclerCart = findViewById(R.id.recyclerCart);
+        txtTongTienCart = findViewById(R.id.txtTongTienCart);
         recyclerCart.setLayoutManager(new GridLayoutManager(this, 1));
         getGiaSanPham getGiaSanPham = new getGiaSanPham();
         getGiaSanPham.execute(ds_SanPham);
-
         btnOrderNow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -184,8 +186,9 @@ public class CartActivity extends AppCompatActivity {
                 getMaHoaDon.execute(makh);
             }
         });
-    }
 
+
+    }
     class GetMaHoaDon extends AsyncTask<String,Void,String>
     {
         @Override
@@ -262,6 +265,12 @@ public class CartActivity extends AppCompatActivity {
         protected void onPostExecute(List<Cart> carts) {
             cartAdapter = new CartAdapter(carts,R.layout.custom_item_order,CartActivity.this);
             recyclerCart.setAdapter(cartAdapter);
+            Integer tongtien = 0;
+            for (Cart item :
+            carts) {
+                tongtien +=item.getGia()*item.getSoluong();
+            }
+            txtTongTienCart.setText(tongtien+"đ");
             super.onPostExecute(carts);
         }
 
@@ -308,7 +317,6 @@ public class CartActivity extends AppCompatActivity {
             return ds_cart;
         }
     }
-
     @Override
     public void onBackPressed() {
         Cursor cursor = gioHang.getData("select * from Carts");
