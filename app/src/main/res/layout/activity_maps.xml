@@ -12,19 +12,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/edtSearchPlace"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/custom_edittext_search"
-        android:drawableStart="@drawable/ic_search_24dp"
-        android:hint="search"
-        android:layout_marginTop="@dimen/margin10"
-        android:imeOptions="actionSearch"
-        android:inputType="text"
-        android:maxLines="1"
-        android:layout_gravity="top"
-        tools:ignore="MissingConstraints" />
+        >
+        <fragment android:id="@+id/autocomplete_fragment"
+            android:layout_marginRight="@dimen/margin20"
+            android:background="@drawable/custom_edittext_search"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+            />
+    </LinearLayout>
     <LinearLayout
         android:id="@+id/bodyLogin"
         android:layout_width="match_parent"

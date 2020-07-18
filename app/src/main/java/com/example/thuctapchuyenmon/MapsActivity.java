@@ -40,6 +40,7 @@ import com.example.model.DataParser;
 import com.example.model.DialogLoading;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -52,6 +53,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -62,9 +67,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -73,7 +80,7 @@ import es.dmoral.toasty.Toasty;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private GoogleMap mMap;
-    EditText edtAddress,edtSearchPlace,edtNguoiNhan,edtSdtNhan;
+    EditText edtAddress,edtNguoiNhan,edtSdtNhan;
     Button btnMyOrder;
     String mahd;
     @Override
@@ -81,6 +88,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         addViews();
+        String apiKey="AIzaSyDNI_ZWPqvdS6r6gPVO50I4TlYkfkZdXh8";
+        if(!Places.isInitialized())
+        {
+            Places.initialize(getApplicationContext(),apiKey);
+        }
+        final AutocompleteSupportFragment autocompleteSupportFragment = (AutocompleteSupportFragment) getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+        autocompleteSupportFragment.setPlaceFields(Arrays.asList(Place.Field.ID,Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.NAME));
+        autocompleteSupportFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(@NonNull Place place) {
+                Log.e("address", place.getAddress() );
+                Log.e("lat_lng", place.getLatLng().latitude+"-"+place.getLatLng().longitude );
+
+                TimKiemDiaChi(place.getAddress());
+                edtAddress.setText(place.getAddress());
+            }
+
+            @Override
+            public void onError(@NonNull Status status) {
+
+            }
+        });
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
@@ -104,7 +133,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
     private void addViews() {
         edtAddress = findViewById(R.id.edtAddress);
-        edtSearchPlace = findViewById(R.id.edtSearchPlace);
         edtNguoiNhan = findViewById(R.id.edtNguoiNhan);
         edtSdtNhan = findViewById(R.id.edtsdtNhan);
         btnMyOrder = findViewById(R.id.btnMyOrder);
@@ -115,35 +143,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void addEvents() {
 
-        edtSearchPlace.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    TimKiemDiaChi(edtSearchPlace.getText().toString());
-                }
-                return true;
-            }
-        });
-        edtSearchPlace.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if(s.length()==0)
-                {
-                    mMap.clear();
-                    ViTriHienTai();
-                }
-            }
-        });
+//        edtSearchPlace.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+//            @Override
+//            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+//                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+//                    TimKiemDiaChi(edtSearchPlace.getText().toString());
+//                }
+//                return true;
+//            }
+//        });
+//        edtSearchPlace.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//                if(s.length()==0)
+//                {
+//                    mMap.clear();
+//                    ViTriHienTai();
+//                }
+//            }
+//        });
 
         btnMyOrder.setOnClickListener(new View.OnClickListener() {
             @Override
