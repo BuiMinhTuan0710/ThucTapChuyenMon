@@ -20,14 +20,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".ForgotPassMainActivity" >
-
-        </activity>
+        <activity android:name=".ForgotPassMainActivity" />
         <activity android:name=".AllFoodMainActivity" />
         <activity android:name=".DoiMatKhauActivity" />
-        <activity android:name=".ChiTietHoaDonActivity" >
-
-        </activity>
+        <activity android:name=".ChiTietHoaDonActivity" />
         <activity android:name=".CartActivity" />
         <activity android:name=".ProfileActivity" />
         <activity android:name=".LoginActivity">
@@ -40,8 +36,7 @@
         <activity android:name=".PasswordActivity" />
         <activity android:name=".ThanhToanActivity" />
         <activity android:name=".ThongTinActivity" />
-        <activity android:name=".RegisterActivity" >
-        </activity>
+        <activity android:name=".RegisterActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -65,6 +60,8 @@
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
+
+        <receiver android:name="com.example.notification.NotificationReceiver" />
     </application>
 
 </manifest>

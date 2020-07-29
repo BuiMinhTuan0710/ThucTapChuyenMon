@@ -81,7 +81,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private GoogleMap mMap;
     EditText edtAddress,edtNguoiNhan,edtSdtNhan;
-    Button btnMyOrder;
     String mahd;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,7 +134,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         edtAddress = findViewById(R.id.edtAddress);
         edtNguoiNhan = findViewById(R.id.edtNguoiNhan);
         edtSdtNhan = findViewById(R.id.edtsdtNhan);
-        btnMyOrder = findViewById(R.id.btnMyOrder);
         Intent intent = getIntent();
         mahd = intent.getStringExtra("mahd");
         Log.e("mahoadon", mahd );
@@ -173,14 +171,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //            }
 //        });
 
-        btnMyOrder.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.e("btn", "onClick: " );
-                UpdateHoaDon update = new UpdateHoaDon();
-                update.execute(mahd);
-            }
-        });
+
+    }
+
+    public void DatHang(View view) {
+        UpdateHoaDon update = new UpdateHoaDon();
+        update.execute(mahd);
     }
 
     public class UpdateHoaDon extends AsyncTask<String,Void,Boolean>
@@ -224,7 +220,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             {
                 return false;
             }
-
         }
     }
     private void ViTriHienTai() {
@@ -317,7 +312,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         JSONObject object = array.getJSONObject(i);
                         edtAddress.setText(object.getString("formatted_address"));
                     }
-
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

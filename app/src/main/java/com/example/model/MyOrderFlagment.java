@@ -1,4 +1,5 @@
 package com.example.model;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -7,6 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -66,11 +69,14 @@ public class MyOrderFlagment extends Fragment {
     {
         @Override
         protected void onPreExecute() {
+            ds_HoaDon.clear();
+            hoaDonAdapter.notifyDataSetChanged();
             DialogLoading.LoadingGoogle(true,progressOrder);
             super.onPreExecute();
         }
         @Override
         protected void onPostExecute(List<HoaDon> hoaDons) {
+            ds_HoaDon.clear();
             DialogLoading.LoadingGoogle(false,progressOrder);
             for (HoaDon item :
                     hoaDons) {
@@ -114,12 +120,27 @@ public class MyOrderFlagment extends Fragment {
             }
         }
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if(resultCode== Activity.RESULT_OK)
+        {
+            Boolean aBoolean = data.getBooleanExtra("back",false);
+            if(aBoolean)
+            {
+                DanhSachHoaDon danhSachHoaDon = new DanhSachHoaDon();
+                danhSachHoaDon.execute();
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
     @Override
     public void onResume() {
+        ds_HoaDon = new ArrayList<>();
         hoaDonAdapter = new HoaDonAdapter(ds_HoaDon,R.layout.custom_item_myorder,getActivity());
         DanhSachHoaDon danhSachHoaDon = new DanhSachHoaDon();
         danhSachHoaDon.execute();
-        hoaDonAdapter.notifyDataSetChanged();
         super.onResume();
     }
 }

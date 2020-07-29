@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
     <com.jpardogo.android.googleprogressbar.library.GoogleProgressBar
-        android:id="@+id/progressOrderCT"
+        android:id="@+id/progressTTHoaDon"
         android:visibility="gone"
         android:background="@drawable/round_icon_cart"
         android:layout_width="50dp"
@@ -39,8 +39,76 @@
             android:layout_width="match_parent"
             android:layout_height="200dp"
             />
-
-
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <TextView
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Giao hàng tới"
+                android:maxLines="1"
+                android:textStyle="bold"
+                android:fontFamily="@font/lobster"
+                android:textSize="@dimen/margin20"/>
+            <TextView
+                android:id="@+id/txtKhoangCach"
+                android:gravity="end"
+                android:layout_weight="1"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="1.8 km"
+                android:maxLines="1"
+                android:textStyle="bold"
+                android:fontFamily="@font/lobster"
+                android:textSize="@dimen/margin20"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                >
+                <TextView
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/txtDiaChiGH"
+                    android:text="449 Lê văn việt quận 9"
+                    android:maxLines="1"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/oswald"
+                    android:textSize="@dimen/margin20"/>
+                <TextView
+                    android:visibility="gone"
+                    android:id="@+id/txtEdit"
+                    android:textColor="@color/colorOrange"
+                    android:gravity="center"
+                    android:layout_marginLeft="@dimen/margin10"
+                    android:layout_weight="1"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="edit"
+                    android:maxLines="1"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/oswald"
+                    android:textSize="@dimen/margin20"/>
+            </LinearLayout>
+            <TextView
+                android:id="@+id/txtThoiGian"
+                android:gravity="end"
+                android:layout_weight="1"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="12 phút"
+                android:maxLines="1"
+                android:textStyle="bold"
+                android:fontFamily="@font/oswald"
+                android:textSize="@dimen/margin20"/>
+        </LinearLayout>
         <Button
             android:layout_gravity="center"
             android:layout_marginBottom="@dimen/margin10"

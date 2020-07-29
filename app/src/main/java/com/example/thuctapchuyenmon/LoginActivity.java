@@ -37,8 +37,17 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.jpardogo.android.googleprogressbar.library.GoogleProgressBar;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import es.dmoral.toasty.Toasty;
 import io.reactivex.annotations.NonNull;
@@ -82,8 +91,8 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(checkValid())
                 {
-                    KiemTraDangNhap kiemTraDangNhap = new KiemTraDangNhap();
-                    kiemTraDangNhap.execute();
+                    KiemTra kiemTra = new KiemTra();
+                    kiemTra.execute(edtPhoneLogin.getText().toString());
                 }
 
             }
@@ -103,7 +112,6 @@ public class LoginActivity extends AppCompatActivity {
         }
         return  true;
     }
-
     public void clickSignUp(View view) {
         Intent intent = new Intent(LoginActivity.this,RegisterActivity.class);
         startActivity(intent);
@@ -113,7 +121,6 @@ public class LoginActivity extends AppCompatActivity {
         Intent intent = new Intent(LoginActivity.this,ForgotPassMainActivity.class);
         startActivity(intent);
     }
-
     public void createRequest()
     {
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -166,6 +173,68 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+    class KiemTra extends AsyncTask<String,Void,Boolean>
+    {
+        @Override
+        protected void onPreExecute() {
+            DialogLoading.LoadingGoogle(true,googleProgressBar);
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            if(aBoolean)
+            {
+                DialogLoading.LoadingGoogle(false,googleProgressBar);
+                edtPhoneLogin.setError("phone number does not exists");
+                edtPhoneLogin.requestFocus();
+            }
+            else
+            {
+                KiemTraDangNhap kiemTraDangNhap = new KiemTraDangNhap();
+                kiemTraDangNhap.execute();
+            }
+            super.onPostExecute(aBoolean);
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onCancelled(Boolean aBoolean) {
+            super.onCancelled(aBoolean);
+        }
+
+        @Override
+        protected Boolean doInBackground(String... strings) {
+            try {
+                URL url = new URL("http://www.minhtuan.somee.com/myService.asmx/kiemtrasdt");
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+
+                String params = "sdt="+strings[0];
+                OutputStream os = connection.getOutputStream();
+                OutputStreamWriter osw = new OutputStreamWriter(os,"UTF-8");
+                osw.write(params);
+                osw.flush();
+                osw.close();
+
+                DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
+                Document document = documentBuilder.parse(connection.getInputStream());
+                NodeList nodeList = document.getElementsByTagName("boolean");
+                String kq = nodeList.item(0).getTextContent();
+                boolean kt = Boolean.parseBoolean(kq);
+                return kt;
+            } catch (Exception e) {
+                Log.e( "loi: ", e.toString());
+            }
+            return false;
+        }
     }
     class InsertKhachHang extends AsyncTask<FirebaseUser,Void,Boolean>
     {
@@ -261,7 +330,6 @@ public class LoginActivity extends AppCompatActivity {
     {
         @Override
         protected void onPreExecute() {
-            DialogLoading.LoadingGoogle(true,googleProgressBar);
             super.onPreExecute();
         }
 
@@ -280,7 +348,8 @@ public class LoginActivity extends AppCompatActivity {
             else
             {
                 DialogLoading.LoadingGoogle(false,googleProgressBar);
-                Toasty.error(LoginActivity.this, "Login fail!", Toast.LENGTH_SHORT, true).show();
+                edtPasswordLogin.setError("password incorrect");
+                edtPasswordLogin.requestFocus();
             }
             super.onPostExecute(b);
         }

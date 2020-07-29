@@ -2,13 +2,19 @@ package com.example.thuctapchuyenmon;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.media.RingtoneManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,12 +23,21 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.adapter.ChiTietSanPhamAdapter;
 import com.example.database.connect;
 import com.example.model.ChiTietHoaDon;
 import com.example.model.DataParser;
 import com.example.model.DialogLoading;
+import com.example.model.HoaDon;
+import com.example.notification.NotificationReceiver;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -33,6 +48,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.jpardogo.android.googleprogressbar.library.GoogleProgressBar;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -46,50 +63,181 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import es.dmoral.toasty.Toasty;
+
+import static com.example.notification.App.CHANNEL_ID2;
 
 public class ChiTietHoaDonActivity extends AppCompatActivity {
 
     RecyclerView recyclerMyorderCT;
-    GoogleProgressBar progressOrderCT;
     ChiTietSanPhamAdapter adapter;
-    List<ChiTietHoaDon>ds_HoaDon;
+    List<ChiTietHoaDon> ds_HoaDon;
     LinearLayout bodyChiTiet;
     FrameLayout frameLayout;
     private GoogleMap mMap;
-    LatLng origin,dest;
+    LatLng origin, dest;
     Button btnHuyOrder;
+    String mahd;
+    TextView txtThoiGian, txtKhoangCach, txtEdit, txtDiaChiGH;
+    TimerTask timerTask;
+    Timer timer;
+    NotificationManagerCompat notificationManagerCompat;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chi_tiet_hoa_don);
+        notificationManagerCompat=NotificationManagerCompat.from(this);
+        createNotification("Đơn Hàng","Đơn Hàng đã đến");
         addViews();
         addEvents();
     }
 
+    public void createNotification(String tittle,String context) {
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID2)
+                .setSmallIcon(R.drawable.ic_launcher_background)
+                .setContentTitle(tittle)
+                .setContentText(context)
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                .setStyle(new NotificationCompat.InboxStyle()
+                        .addLine("line 1")
+                        .addLine("line 2")
+                        .addLine("line 3")
+                        .addLine("line 4")
+                        .addLine("line 5")
+                )
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .build();
+        notificationManagerCompat.notify(1, notification);
+    }
     private void addEvents() {
         Intent intent = getIntent();
-        String mahd = intent.getStringExtra("mahd");
+        mahd = intent.getStringExtra("mahd");
+
+        ThongTinHDon thongTinHDon = new ThongTinHDon();
+        thongTinHDon.execute();
+
         DanhSachSanPham danhSachSanPham = new DanhSachSanPham();
-        danhSachSanPham.execute("HD06");
+        danhSachSanPham.execute(mahd);
 
         GetTrangThai getTrangThai = new GetTrangThai();
-        getTrangThai.execute("HD06");
+        getTrangThai.execute(mahd);
 
         GetViTriGiaoHang getViTriGiaoHang = new GetViTriGiaoHang();
-        getViTriGiaoHang.execute("HD06");
+        getViTriGiaoHang.execute(mahd);
 
-        GetViTriNhanVien getViTriNhanVien = new GetViTriNhanVien();
-        getViTriNhanVien.execute("HD06");
+        timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        GetViTriNhanVien getViTriNhanVien = new GetViTriNhanVien();
+                        getViTriNhanVien.execute(mahd);
+                    }
+                });
+            }
+        };
+        timer = new Timer();
+        timer.schedule(timerTask, 0, 10000);
+
+        btnHuyOrder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                HuyHoaDon();
+            }
+        });
+    }
+
+    private void HuyHoaDon() {
+        GetTrangThaiHoaDon getTrangThaiHoaDon = new GetTrangThaiHoaDon();
+        getTrangThaiHoaDon.execute(mahd);
+    }
+
+    class HuyHD extends AsyncTask<String, Void, Boolean> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            if (aBoolean) {
+                Toasty.success(ChiTietHoaDonActivity.this, "Hủy hóa đơn thành công", Toasty.LENGTH_LONG).show();
+                finish();
+            }
+            super.onPostExecute(aBoolean);
+        }
+
+        @Override
+        protected Boolean doInBackground(String... strings) {
+            try {
+                String params = "mahd=" + strings[0];
+                connect connect = new connect("DeleteHoaDon");
+                NodeList nodeList = connect.getDataParameter(params, "boolean");
+                String kiemtra = nodeList.item(0).getTextContent();
+                return Boolean.parseBoolean(kiemtra);
+            } catch (Exception e) {
+                return false;
+            }
+        }
+    }
+
+    class GetTrangThaiHoaDon extends AsyncTask<String, Void, String> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            if (s.equals("Đang xử lý")) {
+                HuyHD huyHD = new HuyHD();
+                huyHD.execute(mahd);
+            } else {
+                Log.e("lỗi", s);
+            }
+            super.onPostExecute(s);
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onCancelled(String s) {
+            super.onCancelled(s);
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+            try {
+                String params = "mahd=" + strings[0];
+                connect connect = new connect("getTrangThaiHoaDon");
+                NodeList nodeList = connect.getDataParameter(params, "string");
+                return nodeList.item(0).getTextContent();
+            } catch (Exception e) {
+                return "";
+            }
+        }
     }
 
     private void addViews() {
         recyclerMyorderCT = findViewById(R.id.recyclerMyorderCT);
-        progressOrderCT = findViewById(R.id.progressOrderCT);
         ds_HoaDon = new ArrayList<>();
         bodyChiTiet = findViewById(R.id.bodyChiTiet);
         frameLayout = findViewById(R.id.mapThongTin);
-        adapter = new ChiTietSanPhamAdapter(ds_HoaDon,R.layout.custom_item_lvorder,this);
-        recyclerMyorderCT.setLayoutManager(new GridLayoutManager(this,1));
+        txtEdit = findViewById(R.id.txtEdit);
+        txtKhoangCach = findViewById(R.id.txtKhoangCach);
+        txtThoiGian = findViewById(R.id.txtThoiGian);
+        txtDiaChiGH = findViewById(R.id.txtDiaChiGH);
+        adapter = new ChiTietSanPhamAdapter(ds_HoaDon, R.layout.custom_item_lvorder, this);
+        recyclerMyorderCT.setLayoutManager(new GridLayoutManager(this, 1));
 
         btnHuyOrder = findViewById(R.id.btnHuyOrder);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapThongTin);
@@ -100,6 +248,7 @@ public class ChiTietHoaDonActivity extends AppCompatActivity {
             }
         });
     }
+
     private String getUrl(LatLng origin, LatLng dest) {
         // Origin of route
         String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
@@ -112,10 +261,64 @@ public class ChiTietHoaDonActivity extends AppCompatActivity {
         // Output format
         String output = "json";
         // Building the url to the web service
-        String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters+"&key=AIzaSyDNI_ZWPqvdS6r6gPVO50I4TlYkfkZdXh8";
-        Log.e("url",url);
+        String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters + "&key=AIzaSyDNI_ZWPqvdS6r6gPVO50I4TlYkfkZdXh8";
+        Log.e("url", url);
         return url;
     }
+
+    int i=0;
+    public void ThongTinViTri(String vitrinv, String vitrigiaohang, final TextView txtKhoangcach, final TextView txtThoiGian) {
+        String point = "https://maps.googleapis.com/maps/api/directions/json?origin=+" + vitrinv + "&destination=" + vitrigiaohang + "&key=AIzaSyDNI_ZWPqvdS6r6gPVO50I4TlYkfkZdXh8";
+        Log.e("ThongTinViTri: ", point);
+        final RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, point, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    String routes = jsonObject.getString("routes");
+                    JSONArray array = new JSONArray(routes);
+                    for (int i = 0; i < array.length(); i++) {
+                        JSONObject object = array.getJSONObject(i);
+                        String legs = object.getString("legs");
+                        JSONArray jsonArray = new JSONArray(legs);
+                        for (int j = 0; j < jsonArray.length(); j++) {
+                            JSONObject object1 = jsonArray.getJSONObject(i);
+                            JSONObject khoangcach = object1.getJSONObject("distance");
+                            String text = khoangcach.getString("text");
+                            txtKhoangcach.setText(text);
+
+                            JSONObject duration = object1.getJSONObject("duration");
+                            String thoigian = duration.getString("text");
+                            txtThoiGian.setText(thoigian);
+                            String kc = text.substring(0,text.length()-2);
+                            String donvi = text.substring(text.length()-2,text.length());
+                            float v = Float.parseFloat(kc);
+                            if(v<=100&&i==0&&donvi.trim().equals("m"))
+                            {
+                                Intent intent = new Intent(ChiTietHoaDonActivity.this,ThanhToanActivity.class);
+                                intent.putExtra("mahd",mahd);
+                                startActivityForResult(intent,130);
+                                finish();
+                                timerTask.cancel();
+                                i++;
+                            }
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("lỗi", error.getMessage());
+            }
+        }
+        );
+        requestQueue.add(stringRequest);
+    }
+
     private String downloadUrl(String strUrl) throws IOException {
         String data = "";
         InputStream iStream = null;
@@ -145,6 +348,7 @@ public class ChiTietHoaDonActivity extends AppCompatActivity {
         }
         return data;
     }
+
     private class FetchUrl extends AsyncTask<String, Void, String> {
 
         @Override
@@ -174,6 +378,7 @@ public class ChiTietHoaDonActivity extends AppCompatActivity {
 
         }
     }
+
     private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
 
         // Parsing the data in non-ui thread
@@ -185,17 +390,17 @@ public class ChiTietHoaDonActivity extends AppCompatActivity {
 
             try {
                 jObject = new JSONObject(jsonData[0]);
-                Log.d("ParserTask",jsonData[0].toString());
+                Log.d("ParserTask", jsonData[0].toString());
                 DataParser parser = new DataParser();
                 Log.d("ParserTask", parser.toString());
 
                 // Starts parsing data
                 routes = parser.parse(jObject);
-                Log.d("ParserTask","Executing routes");
-                Log.d("ParserTask",routes.toString());
+                Log.d("ParserTask", "Executing routes");
+                Log.d("ParserTask", routes.toString());
 
             } catch (Exception e) {
-                Log.d("ParserTask",e.toString());
+                Log.d("ParserTask", e.toString());
                 e.printStackTrace();
             }
             return routes;
@@ -224,15 +429,46 @@ public class ChiTietHoaDonActivity extends AppCompatActivity {
                 lineOptions.addAll(points);
                 lineOptions.width(10);
                 lineOptions.color(Color.RED);
-                Log.d("onPostExecute","onPostExecute lineoptions decoded");
+                Log.d("onPostExecute", "onPostExecute lineoptions decoded");
             }
 
             // Drawing polyline in the Google Map for the i-th route
-            if(lineOptions != null) {
+            if (lineOptions != null) {
                 mMap.addPolyline(lineOptions);
+            } else {
+                Log.d("onPostExecute", "without Polylines drawn");
             }
-            else {
-                Log.d("onPostExecute","without Polylines drawn");
+        }
+    }
+
+    class ThongTinHDon extends AsyncTask<Void,Void,String>
+    {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            if(!s.isEmpty())
+            {
+                txtDiaChiGH.setText(s);
+            }
+            super.onPostExecute(s);
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            try {
+                String params = "mahd="+mahd;
+                connect connect = new connect("HoaDonKH");
+                NodeList nodeList = connect.getDataParameter(params,"HoaDon");
+                Element element = (Element) nodeList.item(0);
+                return element.getElementsByTagName("diachinhan").item(0).getTextContent();
+            }
+            catch (Exception e)
+            {
+                return "";
             }
         }
     }
@@ -246,17 +482,18 @@ public class ChiTietHoaDonActivity extends AppCompatActivity {
         protected void onPostExecute(String s) {
             if(!s.isEmpty())
             {
+                mMap.clear();
                 String[] vitri = s.split(",");
                 float lat = Float.parseFloat(vitri[0]);
                 float lng = Float.parseFloat(vitri[1]);
                 origin = new LatLng(lat,lng);
-                // Getting URL to the Google Directions API
                 String url = getUrl(origin, dest);
-                Log.d("onMapClick", url.toString());
                 FetchUrl FetchUrl = new FetchUrl();
-                // Start downloading json data from Google Directions API
                 FetchUrl.execute(url);
                 ViTriGiaoHang(origin);
+                String vitrinhanvien = origin.latitude+","+origin.longitude;
+                String vitrigiaohang = dest.latitude+","+dest.longitude;
+                ThongTinViTri(vitrinhanvien,vitrigiaohang,txtKhoangCach,txtThoiGian);
             }
             super.onPostExecute(s);
         }
@@ -345,10 +582,15 @@ public class ChiTietHoaDonActivity extends AppCompatActivity {
         protected void onPostExecute(String s) {
             if(s.equals("Đang giao"))
             {
-//                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-//                bodyChiTiet.setLayoutParams(layoutParams);
                 frameLayout.setVisibility(View.VISIBLE);
                 btnHuyOrder.setVisibility(View.INVISIBLE);
+                txtEdit.setVisibility(View.GONE);
+            }
+            else
+            {
+                txtThoiGian.setVisibility(View.GONE);
+                txtEdit.setVisibility(View.VISIBLE);
+                txtKhoangCach.setVisibility(View.GONE);
             }
             super.onPostExecute(s);
         }
@@ -413,12 +655,10 @@ public class ChiTietHoaDonActivity extends AppCompatActivity {
         }
         @Override
         protected void onPreExecute() {
-            DialogLoading.LoadingGoogle(false,progressOrderCT);
             super.onPreExecute();
         }
         @Override
         protected void onPostExecute(List<ChiTietHoaDon> chiTietHoaDons) {
-            DialogLoading.LoadingGoogle(false,progressOrderCT);
             for (ChiTietHoaDon ct :
                     chiTietHoaDons) {
                 ds_HoaDon.add(ct);
@@ -437,5 +677,12 @@ public class ChiTietHoaDonActivity extends AppCompatActivity {
         protected void onCancelled(List<ChiTietHoaDon> chiTietHoaDons) {
             super.onCancelled(chiTietHoaDons);
         }
+    }
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent();
+        intent.putExtra("back",true);
+        setResult(Activity.RESULT_OK,intent);
+        super.onBackPressed();
     }
 }

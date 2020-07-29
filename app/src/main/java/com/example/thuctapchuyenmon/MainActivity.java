@@ -12,15 +12,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.database.connect;
-import com.facebook.AccessToken;
-import com.facebook.AccessTokenTracker;
-import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
 import androidx.appcompat.app.AppCompatActivity;
-import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -59,8 +51,6 @@ public class MainActivity extends AppCompatActivity {
     public static final int RC_SIGN_IN = 115;
     public static final int FB_SIGN_IN = 113;
     private FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-    private CallbackManager FBCallbackManager;
-    private LoginButton loginButton;
     private String tag = "Facebook Login :";
     private EditText edtUser,edtPassword;
     @Override
@@ -72,27 +62,6 @@ public class MainActivity extends AppCompatActivity {
         //setupLoginFacebook();
     }
 
-    private void setupLoginFacebook() {
-        FBCallbackManager = CallbackManager.Factory.create();
-        loginButton.setReadPermissions(Arrays.asList("email,public_profile"));
-        loginButton.registerCallback(FBCallbackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-                Log.d(tag,"onSuccess"+loginResult);
-                handleFacebookAccessToken(loginResult.getAccessToken());
-            }
-            @Override
-            public void onCancel() {
-                Log.d(tag,"onCancel");
-            }
-
-            @Override
-            public void onError(FacebookException error) {
-                Log.d(tag,"onError");
-                saveUserInfo(null);
-            }
-        });
-    }
     public void saveUserInfo(FirebaseUser firebaseUser)
     {
         SharedPreferences preferences = this.getPreferences(MODE_PRIVATE);
@@ -115,28 +84,6 @@ public class MainActivity extends AppCompatActivity {
         }
         editor.commit();
     }
-    private void handleFacebookAccessToken(AccessToken accessToken) {
-        AuthCredential authCredential = FacebookAuthProvider.getCredential(accessToken.getToken());
-        firebaseAuth.signInWithCredential(authCredential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@androidx.annotation.NonNull Task<AuthResult> task) {
-                        if(task!=null)
-                        {
-                            FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-                            saveUserInfo(firebaseUser);
-                            Intent intent = new Intent(MainActivity.this,ChucNangActivity.class);
-                            startActivity(intent);
-                        }
-                        else
-                        {
-                            Log.d(tag,"false complete");
-                            saveUserInfo(null);
-                        }
-                    }
-                });
-    }
-
     private void addViews() {
         edtUser = findViewById(R.id.edtUser);
         edtPassword = findViewById(R.id.edtPass);

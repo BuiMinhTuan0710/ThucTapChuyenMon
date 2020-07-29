@@ -42,8 +42,7 @@ public class ChiTietSanPhamAdapter extends RecyclerView.Adapter<ChiTietSanPhamAd
         }
         holder.txtNameLV.setText(ct.getTensp());
         holder.txtGiaLV.setText("   "+ct.getGiasp()+"đ");
-        holder.txtSoLuongLV.setText("Số Lượng: "+ct.getSoluong());
-        Picasso.get().load(ct.getHinhsp()).into(holder.imgHinhLV);
+        holder.txtSoLuongLV.setText("x "+ct.getSoluong());
     }
     @Override
     public int getItemCount() {
@@ -53,14 +52,12 @@ public class ChiTietSanPhamAdapter extends RecyclerView.Adapter<ChiTietSanPhamAd
     class ViewHolder extends RecyclerView.ViewHolder
     {
         TextView txtNameLV,txtSizeLV,txtGiaLV,txtSoLuongLV;
-        RoundedImageView imgHinhLV;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             txtNameLV = itemView.findViewById(R.id.txtNameItemLV);
             txtSizeLV = itemView.findViewById(R.id.txtSizeItemLV);
             txtGiaLV = itemView.findViewById(R.id.txtGiaItemLV);
             txtSoLuongLV = itemView.findViewById(R.id.txtSoLuongItemLV);
-            imgHinhLV = itemView.findViewById(R.id.imgItemLV);
         }
     }
 }
